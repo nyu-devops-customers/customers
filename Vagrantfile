@@ -8,17 +8,17 @@
 Vagrant.configure(2) do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.define "tdd" do |tdd|
-      tdd.vm.box = "ubuntu/xenial64"
+  config.vm.define "alpha" do |alpha|
+      alpha.vm.box = "ubuntu/xenial64"
       # set up network ip and port forwarding
-      tdd.vm.network "forwarded_port", guest: 6000, host: 6000, host_ip: "127.0.0.1"
-      tdd.vm.network "private_network", ip: "192.168.33.10"
+      alpha.vm.network "forwarded_port", guest: 6000, host: 6000, host_ip: "127.0.0.1"
+      alpha.vm.network "private_network", ip: "192.168.33.10"
 
       # Windows users need to change the permissions explicitly so that Windows doesn't
       # set the execute bit on all of your files which messes with GitHub users on Mac and Linux
-      tdd.vm.synced_folder "./", "/vagrant", owner: "ubuntu", mount_options: ["dmode=755,fmode=644"]
+      alpha.vm.synced_folder "./", "/vagrant", owner: "ubuntu", mount_options: ["dmode=755,fmode=644"]
 
-      tdd.vm.provider "virtualbox" do |vb|
+      alpha.vm.provider "virtualbox" do |vb|
         # Customize the amount of memory on the VM:
         vb.memory = "512"
         vb.cpus = 1
