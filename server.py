@@ -1,4 +1,4 @@
-# Copyright 2016, 2017 John J. Rofrano. All Rights Reserved.
+# Copyright NYU-DevOps-Alpha team-customer. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -170,6 +170,4 @@ def delete_customers(id):
 ######################################################################
 if __name__ == "__main__":
     # dummy data for testing
-    Customer(0, 'Yuqian', 'Zhang').save()
-    Customer(0, 'Diandian', 'Zhang').save()
     app.run(host='0.0.0.0', port=int(PORT), debug=DEBUG)
