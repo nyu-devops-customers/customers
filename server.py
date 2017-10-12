@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Customer Shop Demo
+Customer
 
 This is an example of a shop service written with Python Flask
 It demonstraits how a RESTful service should be implemented.
