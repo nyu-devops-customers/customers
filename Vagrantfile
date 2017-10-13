@@ -25,14 +25,31 @@ Vagrant.configure(2) do |config|
       end
   end
 
+  config.vm.provision "shell", inline: <<-SHELL
+    # Prepare Redis/Mysql data share
+    sudo mkdir -p /home/ubuntu/data/mysql
+    sudo mkdir -p /home/ubuntu/data/redis
+    sudo chown ubuntu:ubuntu /home/ubuntu/data/mysql
+    sudo chown ubuntu:ubuntu /home/ubuntu/data/redis
+  SHELL
+
+  # Add Mysql docker container
+  config.vm.provision "docker" do |d|
+    d.pull_images "centurylink/mysql:5.5"
+    d.pull_images "redis:alpine"
+    d.run "centurylink/mysql:5.5",
+      args: "-d --name mysql -p 3306:3306 -v /home/ubuntu/data/mysql:/var/lib/mysql"
+    d.run "redis:alpine",
+      args: "-d --name redis -p 6379:6379 -v /home/ubuntu/data/redis:/data"
+  end
+
+  # Add Redis docker container
+  # config.vm.provision "docker" do |d|
+  # end
+
   # Copy your .gitconfig file so that your git credentials are correct
   if File.exists?(File.expand_path("~/.gitconfig"))
     config.vm.provision "file", source: "~/.gitconfig", destination: "~/.gitconfig"
-  end
-
-  # Copy your ssh keys for github so that your git credentials work
-  if File.exists?(File.expand_path("~/.ssh/id_rsa"))
-    config.vm.provision "file", source: "~/.ssh/id_rsa", destination: "~/.ssh/id_rsa"
   end
 
   # Enable provisioning with a shell script. Additional provisioners such as
@@ -40,7 +57,7 @@ Vagrant.configure(2) do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    apt-get install -y git python-pip python-dev build-essential
+    apt-get install -y git python-pip python-dev build-essential mysql-client
     pip install --upgrade pip
     apt-get -y autoremove
     # Install app dependencies
