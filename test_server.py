@@ -7,8 +7,8 @@
 import logging
 import unittest
 import json
-#from mock import MagicMock, patch
-#from flask_api import status    # HTTP Status Codes
+from mock import MagicMock, patch
+from flask_api import status    # HTTP Status Codes
 import server
 
 ######################################################################
@@ -27,7 +27,7 @@ class TestCustomerServer(unittest.TestCase):
         """ Runs before each test """
         server.Customer.remove_all()
         server.Customer(0, 'William', 'Smith').save()
-        server.customer(0, 'Scott', 'Sun').save()
+        server.Customer(0, 'Scott', 'Sun').save()
         self.app = server.app.test_client()
 
     def tearDown(self):
@@ -79,7 +79,7 @@ class TestCustomerServer(unittest.TestCase):
         resp = self.app.get('/customers')
         data = json.loads(resp.data)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(data), customert_count + 1)
+        self.assertEqual(len(data), customer_count + 1)
         self.assertIn(new_json, data)
 
     def test_update_customer(self):
@@ -131,17 +131,17 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_customer_list_by_lastname(self):
-        """ Query Customers by Category """
-        resp = self.app.get('/customers', query_string='lastname = sun')
+        """ Query Customers by lastname """
+        resp = self.app.get('/customers', query_string='lastname = Sun')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(len(resp.data) > 0)
-        self.assertTrue('scott' in resp.data)
+        self.assertTrue('Scott' in resp.data)
         self.assertFalse('kitty' in resp.data)
         data = json.loads(resp.data)
         query_item = data[0]
-        self.assertEqual(query_item['lastname'], 'sun')
+        self.assertEqual(query_item['lastname'], 'Sun')
 
-    def test_query_customer_list_by_name(self):
+    def test_query_customer_list_by_firstname(self):
         """ Query Customers by Name """
         resp = self.app.get('/customers', query_string='firstname=Yuxi')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)

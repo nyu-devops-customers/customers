@@ -26,11 +26,12 @@ POST /customers - Creates a Customer in the datbase from the posted database
 PUT  /customers/{id} - Updates a Customer in the database fom the posted database
 DELETE /customers{id} - Removes a Customer from the database that matches the id
 """
-
+import sys
 import os
 import logging
 from flask import Flask, Response, jsonify, request, json, url_for, make_response
 from models import Customer, DataValidationError
+#from flask_api import status    # HTTP Status Codes
 
 # Pull options from environment
 DEBUG = (os.getenv('DEBUG', 'False') == 'True')
@@ -164,12 +165,36 @@ def delete_customers(id):
     if customer:
         customer.delete()
     return make_response('', HTTP_204_NO_CONTENT)
+######################################################################
+#  U T I L I T Y   F U N C T I O N S
+######################################################################
+'''
+def initialize_logging(log_level):
+    """ Initialized the default logging to STDOUT """
+    if not app.debug:
+        print 'Setting up logging...'
 
+	# Set up default logging for submodules to use STDOUT
+        # datefmt='%m/%d/%Y %I:%M:%S %p'
+        fmt = '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+        logging.basicConfig(stream=sys.stdout, level=log_level, format=fmt)
+        # Make a new log handler that uses STDOUT
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter(fmt))
+        handler.setLevel(log_level)
+        # Remove the Flask default handlers and use our own
+        handler_list = list(app.logger.handlers)
+        for log_handler in handler_list:
+            app.logger.removeHandler(log_handler)
+        app.logger.addHandler(handler)
+        app.logger.setLevel(log_level)
+        app.logger.info('Logging handler established')
+'''
 ######################################################################
 #   M A I N
 ######################################################################
 if __name__ == "__main__":
     # dummy data for testing
-    Customer(0, 'Yuqian', 'Zhang').save()
-    Customer(0, 'Diandian', 'Zhang').save()
+#    print "Customer Service Starting..."
+   # initialize_logging(logging.INFO)   
     app.run(host='0.0.0.0', port=int(PORT), debug=DEBUG)
