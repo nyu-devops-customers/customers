@@ -23,7 +23,7 @@ POST /customers - creates a new Customer record in the database
 PUT /customers/{id} - updates a Customer record in the database
 DELETE /customers/{id} - deletes a Customer record in the database
 """
-import sys
+
 import os
 import sys
 import logging
@@ -31,7 +31,6 @@ from flask import Flask, jsonify, request, url_for, make_response
 from flask_api import status    # HTTP Status Codes
 from werkzeug.exceptions import NotFound
 from models import Customer, DataValidationError
-#from flask_api import status    # HTTP Status Codes
 
 # Create Flask application
 app = Flask(__name__)
@@ -183,12 +182,17 @@ def delete_customers(customer_id):
     customer = Customer.find(customer_id)
     if customer:
         customer.delete()
+    return make_response('', status.HTTP_204_NO_CONTENT)
+
+######################################################################
+#  U T I L I T Y   F U N C T I O N S
+######################################################################
 
 def initialize_logging(log_level):
     """ Initialized the default logging to STDOUT """
     if not app.debug:
         print 'Setting up logging...'
-
+        # Set up default logging for submodules to use STDOUT
         # datefmt='%m/%d/%Y %I:%M:%S %p'
         fmt = '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
         logging.basicConfig(stream=sys.stdout, level=log_level, format=fmt)
@@ -204,9 +208,11 @@ def initialize_logging(log_level):
         app.logger.setLevel(log_level)
         app.logger.info('Logging handler established')
 
+
 ######################################################################
 #   M A I N
 ######################################################################
 if __name__ == "__main__":
-
+    print "Customer Service Starting..."
+    initialize_logging(logging.INFO)
     app.run(host='0.0.0.0', port=int(PORT), debug=DEBUG)
