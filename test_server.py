@@ -166,10 +166,17 @@ class TestCustomerServer(unittest.TestCase):
 
     @patch('server.Customer.find_by_firstname')
     def test_mock_search_data(self, customer_find_mock):
-        """ Test showing how to mock data """
+        """ Mocking the  """
         customer_find_mock.return_value = None
         resp = self.app.get('/customers', query_string='firstname=fido')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # def test_415_unsupported_media_type(self):
+    #     """ Update a Customer """
+    #     new_kitty = {'firstname': 'kitty', 'lastname': 'tabby'}
+    #     data = json.dumps(new_kitty)
+    #     resp = self.app.put('/customers/2', data= data, content_type='string')
+    #     self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
 
 ######################################################################
