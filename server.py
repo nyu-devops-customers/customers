@@ -33,7 +33,7 @@ from werkzeug.exceptions import NotFound
 from models import Customer, DataValidationError
 
 # Create Flask application
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 # Pull options from environment
 DEBUG = (os.getenv('DEBUG', 'False') == 'True')
@@ -89,10 +89,7 @@ def internal_server_error(error):
 @app.route('/')
 def index():
     """ Root URL response """
-    return jsonify(name='Customer Demo REST API Service',
-                   version='1.0',
-                   paths=url_for('list_customers', _external=True)
-                  ), status.HTTP_200_OK
+    return app.send_static_file('index.html')
 
 ######################################################################
 # LIST ALL CUSTOMERS
