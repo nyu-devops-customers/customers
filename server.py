@@ -68,12 +68,12 @@ def method_not_supported(error):
     app.logger.info(message)
     return jsonify(status=405, error='Method not Allowed', message=message), 405
 
-@app.errorhandler(415)
-def mediatype_not_supported(error):
-    """ Handles unsuppoted media requests with 415_UNSUPPORTED_MEDIA_TYPE """
-    message = error.message or str(error)
-    app.logger.info(message)
-    return jsonify(status=415, error='Unsupported media type', message=message), 415
+# @app.errorhandler(415)
+# def mediatype_not_supported(error):
+#     """ Handles unsuppoted media requests with 415_UNSUPPORTED_MEDIA_TYPE """
+#     message = error.message or str(error)
+#     app.logger.info(message)
+#     return jsonify(status=415, error='Unsupported media type', message=message), 415
 
 @app.errorhandler(500)
 def internal_server_error(error):
@@ -101,11 +101,11 @@ def index():
 def list_customers():
     """ Returns all of the Customers """
     customers = []
-    category = request.args.get('category')
-    name = request.args.get('name')
-    if category:
+    lastname = request.args.get('lastname')
+    firstname = request.args.get('firstname')
+    if lastname:
         customers = Customer.find_by_lastname(lastname)
-    elif name:
+    elif firstname:
         customers = Customer.find_by_firstname(firstname)
     else:
         customers = Customer.all()
