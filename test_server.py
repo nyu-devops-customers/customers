@@ -158,18 +158,18 @@ class TestCustomerServer(unittest.TestCase):
          self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     # @patch('server.Customer.find_by_firstname')
-    # def test_bad_request(self, bad_request_mock):
-    #     """ Test a Bad Request error from Find By firstname """
-    #     bad_request_mock.side_effect = ValueError()
-    #     resp = self.app.get('/customers', query_string='firstname=fido')
-    #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+    def test_bad_request(self):
+        """ Test a Bad Request error from Find By firstname """
+        # bad_request_mock.side_effect = ValueError()
+        resp = self.app.post('customers')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-    # @patch('server.Customer.find_by_firstname')
-    # def test_mock_search_data(self, customer_find_mock):
-    #     """ Test showing how to mock data """
-    #     customer_find_mock.return_value = [MagicMock(serialize=lambda: {'firstname': 'fido'})]
-    #     resp = self.app.get('/customers', query_string='firstname=fido')
-    #     self.assertEqual(resp.status_code, status.HTTP_200_OK)
+    @patch('server.Customer.find_by_firstname')
+    def test_mock_search_data(self, customer_find_mock):
+        """ Test showing how to mock data """
+        customer_find_mock.return_value = None
+        resp = self.app.get('/customers', query_string='firstname=fido')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 ######################################################################

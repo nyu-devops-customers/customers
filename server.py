@@ -101,11 +101,11 @@ def index():
 def list_customers():
     """ Returns all of the Customers """
     customers = []
-    category = request.args.get('category')
-    name = request.args.get('name')
-    if category:
+    lastname = request.args.get('lastname')
+    firstname = request.args.get('firstname')
+    if lastname:
         customers = Customer.find_by_lastname(lastname)
-    elif name:
+    elif firstname:
         customers = Customer.find_by_firstname(firstname)
     else:
         customers = Customer.all()
