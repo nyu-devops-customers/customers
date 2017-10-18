@@ -131,7 +131,8 @@ class TestCustomerServer(unittest.TestCase):
 
     def test_query_customer_list_by_lastname(self):
         """ Query Customers by Lastname """
-        resp = self.app.get('/customers/query', query_string='lastname=dog')
+        query_info= {'lastname': 'dog'}
+        resp = self.app.get('/customers/query', data = json.dumps(query_info), content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(len(resp.data) > 0)
         self.assertTrue('fido' in resp.data)
@@ -142,7 +143,8 @@ class TestCustomerServer(unittest.TestCase):
 
     def test_query_customer_list_by_firstname(self):
         """ Query Customers by Name """
-        resp = self.app.get('/customers/query', query_string='firstname=fido')
+        query_info = {'firstname': 'fido'}
+        resp = self.app.get('/customers/query', data = json.dumps(query_info), content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(len(resp.data) > 0)
         self.assertTrue('fido' in resp.data)
@@ -167,7 +169,7 @@ class TestCustomerServer(unittest.TestCase):
     def test_mock_search_data(self, customer_find_mock):
         """ Mocking the  """
         customer_find_mock.side_effect = ValueError()
-        resp = self.app.get('/customers/query', query_string='firstname=fido')
+        resp = self.app.get('/customers/query', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_415_unsupported_media_type(self):
