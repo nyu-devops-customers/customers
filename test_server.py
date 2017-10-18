@@ -38,8 +38,7 @@ class TestCustomerServer(unittest.TestCase):
         """ Test the Home Page """
         resp = self.app.get('/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data = json.loads(resp.data)
-        self.assertEqual(data['name'], 'Customer Demo REST API Service')
+        self.assertEqual(resp.content_type, 'text/html; charset=utf-8')
 
     def test_get_customer_list(self):
         """ Get a list of Customers """
@@ -161,7 +160,7 @@ class TestCustomerServer(unittest.TestCase):
     def test_bad_request(self):
         """ Test a Bad Request error from Find By firstname """
         # bad_request_mock.side_effect = ValueError()
-        resp = self.app.post('customers')
+        resp = self.app.post('customers', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     @patch('server.Customer.find_by_firstname')

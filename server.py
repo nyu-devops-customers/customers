@@ -90,7 +90,7 @@ def check_content_type(content_type):
         def decorated_function(*args, **kwargs):
             """ Checks that the media type is correct """
             if request.headers['Content-Type'] == content_type:
-                return f(*args, **kawrgs)
+                return f(*args, **kwargs)
             else:
                 app.logger.error('Invalid Content-Type: %s', request.headers['Content-Type'])
                 raise UnsupportedMediaType('Content-Type must be {}'.format(content_type))
@@ -109,7 +109,7 @@ def index():
 # LIST ALL CUSTOMERS
 ######################################################################
 @app.route('/customers', methods=['GET'])
-@check_content_type('application/json')
+# @check_content_type('application/json')
 def list_customers():
     """ Returns all of the Customers """
     customers = []
@@ -130,7 +130,6 @@ def list_customers():
 # RETRIEVE A CUSTOMER
 ######################################################################
 @app.route('/customers/<int:customer_id>', methods=['GET'])
-@check_content_type('application/json')
 def get_customers(customer_id):
     """
     Retrieve a single Customer
