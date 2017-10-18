@@ -46,6 +46,9 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = json.loads(resp.data)
         self.assertEqual(len(data), 2)
+        server.Customer.remove_all()
+        resp = self.app.get('/customers')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_customer(self):
         """ Get one Customer """
@@ -152,6 +155,16 @@ class TestCustomerServer(unittest.TestCase):
         data = json.loads(resp.data)
         query_item = data[0]
         self.assertEqual(query_item['firstname'], 'fido')
+        server.Customer.remove_all()
+        resp = self.app.get('/customers/query', data = json.dumps(query_info), content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_query_customer_list_by_unsupported_field(self):
+        """ Query Customers by Name """
+        query_info = {'dump': 'fido'}
+        resp = self.app.get('/customers/query', data = json.dumps(query_info), content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
 
     def test_method_not_allowed(self):
          """ Call a Method thats not Allowed """
@@ -166,10 +179,11 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     @patch('server.Customer.find_by_firstname')
-    def test_mock_search_data(self, customer_find_mock):
+    def test_mock_search_data_internal_error(self, customer_find_mock):
         """ Mocking the  """
-        customer_find_mock.side_effect = ValueError()
-        resp = self.app.get('/customers/query', content_type='application/json')
+        customer_find_mock.side_effect = OSError()
+        query_info= {'firstname': 'fido'}
+        resp = self.app.get('/customers/query', data = json.dumps(query_info), content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_415_unsupported_media_type(self):
