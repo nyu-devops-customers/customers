@@ -109,9 +109,22 @@ def index():
 # LIST ALL CUSTOMERS
 ######################################################################
 @app.route('/customers', methods=['GET'])
-# @check_content_type('application/json')
 def list_customers():
     """ Returns all of the Customers """
+    customers = Customer.all()
+    if not customers:
+        raise NotFound("No Customers")
+    results = [customer.serialize() for customer in customers]
+    return make_response(jsonify(results), status.HTTP_200_OK)
+
+
+######################################################################
+# QUERY CUSTOMERS
+######################################################################
+@app.route('/customers/query', methods=['GET'])
+@check_content_type('application/json')
+def query_customers():
+    """ Query parts of the Customers """
     customers = []
     lastname = request.args.get('lastname')
     firstname = request.args.get('firstname')
@@ -120,11 +133,11 @@ def list_customers():
     elif firstname:
         customers = Customer.find_by_firstname(firstname)
     else:
-        customers = Customer.all()
-
+        raise BadRequest("Can only be search by firstname or lastname")
+    if not customers:
+        raise NotFound("No Customers Found")
     results = [customer.serialize() for customer in customers]
     return make_response(jsonify(results), status.HTTP_200_OK)
-
 
 ######################################################################
 # RETRIEVE A CUSTOMER
