@@ -27,9 +27,10 @@ DELETE /customers/{id} - deletes a Customer record in the database
 import os
 import sys
 import logging
+from functools import wraps
 from flask import Flask, jsonify, request, url_for, make_response
 from flask_api import status    # HTTP Status Codes
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, UnsupportedMediaType
 from models import Customer, DataValidationError
 
 # Create Flask application
@@ -68,12 +69,12 @@ def method_not_supported(error):
     app.logger.info(message)
     return jsonify(status=405, error='Method not Allowed', message=message), 405
 
-# @app.errorhandler(415)
-# def mediatype_not_supported(error):
-#     """ Handles unsuppoted media requests with 415_UNSUPPORTED_MEDIA_TYPE """
-#     message = error.message or str(error)
-#     app.logger.info(message)
-#     return jsonify(status=415, error='Unsupported media type', message=message), 415
+@app.errorhandler(415)
+def mediatype_not_supported(error):
+	""" Handles unsuppoted media requests with 415_UNSUPPORTED_MEDIA_TYPE """
+	message = error.message or str(error)
+	app.logger.info(message)
+	return jsonify(status=415, error='Unsupported media type', message=message), 415
 
 @app.errorhandler(500)
 def internal_server_error(error):
@@ -82,6 +83,19 @@ def internal_server_error(error):
     app.logger.info(message)
     return jsonify(status=500, error='Internal Server Error', message=message), 500
 
+# check content type
+def check_content_type(content_type):
+    def decorater(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            """ Checks that the media type is correct """
+            if request.headers['Content-Type'] == content_type:
+                return f(*args, **kwargs)
+            else:
+                app.logger.error('Invalid Content-Type: %s', request.headers['Content-Type'])
+                raise UnsupportedMediaType('Content-Type must be {}'.format(content_type))
+        return decorated_function
+    return decorater
 
 ######################################################################
 # GET INDEX
@@ -95,6 +109,7 @@ def index():
 # LIST ALL CUSTOMERS
 ######################################################################
 @app.route('/customers', methods=['GET'])
+# @check_content_type('application/json')
 def list_customers():
     """ Returns all of the Customers """
     customers = []
@@ -131,6 +146,7 @@ def get_customers(customer_id):
 # ADD A NEW CUSTOMER
 ######################################################################
 @app.route('/customers', methods=['POST'])
+@check_content_type('application/json')
 def create_customers():
     """
     Creates a Customer
@@ -151,6 +167,7 @@ def create_customers():
 # UPDATE AN EXISTING CUSTOMER
 ######################################################################
 @app.route('/customers/<int:customer_id>', methods=['PUT'])
+@check_content_type('application/json')
 def update_customers(customer_id):
     """
     Update a Customer
@@ -170,6 +187,7 @@ def update_customers(customer_id):
 # DELETE A CUSTOMER
 ######################################################################
 @app.route('/customers/<int:customer_id>', methods=['DELETE'])
+@check_content_type('application/json')
 def delete_customers(customer_id):
     """
     Delete a Customer
