@@ -171,12 +171,12 @@ class TestCustomerServer(unittest.TestCase):
         resp = self.app.get('/customers', query_string='firstname=fido')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # def test_415_unsupported_media_type(self):
-    #     """ Update a Customer """
-    #     new_kitty = {'firstname': 'kitty', 'lastname': 'tabby'}
-    #     data = json.dumps(new_kitty)
-    #     resp = self.app.put('/customers/2', data= data, content_type='string')
-    #     self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+    def test_415_unsupported_media_type(self):
+        """ Update a Customer """
+        new_kitty = {'firstname': 'kitty', 'lastname': 'tabby'}
+        data = json.dumps(new_kitty)
+        resp = self.app.put('/customers/2', data= data, content_type='string')
+        self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
 
 ######################################################################
