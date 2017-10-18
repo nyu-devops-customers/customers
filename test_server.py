@@ -38,8 +38,7 @@ class TestCustomerServer(unittest.TestCase):
         """ Test the Home Page """
         resp = self.app.get('/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data = json.loads(resp.data)
-        self.assertEqual(data['name'], 'Customer Demo REST API Service')
+        self.assertEqual(resp.content_type, 'text/html; charset=utf-8')
 
     def test_get_customer_list(self):
         """ Get a list of Customers """
@@ -161,7 +160,7 @@ class TestCustomerServer(unittest.TestCase):
     def test_bad_request(self):
         """ Test a Bad Request error from Find By firstname """
         # bad_request_mock.side_effect = ValueError()
-        resp = self.app.post('customers')
+        resp = self.app.post('customers', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     @patch('server.Customer.find_by_firstname')
@@ -171,12 +170,12 @@ class TestCustomerServer(unittest.TestCase):
         resp = self.app.get('/customers', query_string='firstname=fido')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # def test_415_unsupported_media_type(self):
-    #     """ Update a Customer """
-    #     new_kitty = {'firstname': 'kitty', 'lastname': 'tabby'}
-    #     data = json.dumps(new_kitty)
-    #     resp = self.app.put('/customers/2', data= data, content_type='string')
-    #     self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+    def test_415_unsupported_media_type(self):
+        """ Update a Customer """
+        new_kitty = {'firstname': 'kitty', 'lastname': 'tabby'}
+        data = json.dumps(new_kitty)
+        resp = self.app.put('/customers/2', data= data, content_type='string')
+        self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
 
 ######################################################################
