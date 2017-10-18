@@ -109,7 +109,7 @@ $(function () {
 
             $("#retrive_result_id").empty();
             $("#retrive_result_name").empty();
-            $("#retrive_result_id").append("server error!");
+            $("#retrive_result_id").append("user id does not exist!");
         });
     });
 

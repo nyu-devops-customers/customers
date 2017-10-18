@@ -24,7 +24,7 @@ PUT /customers/{id} - updates a Customer record in the database
 DELETE /customers/{id} - deletes a Customer record in the database
 """
 
-import os
+import os, re
 import sys
 import logging
 from functools import wraps
@@ -89,7 +89,8 @@ def check_content_type(content_type):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             """ Checks that the media type is correct """
-            if request.headers['Content-Type'] == content_type:
+            pattern = re.compile(content_type+'.*')
+            if pattern.match(request.headers['Content-Type']):
                 return f(*args, **kwargs)
             else:
                 app.logger.error('Invalid Content-Type: %s', request.headers['Content-Type'])
