@@ -90,11 +90,16 @@ def check_content_type(content_type):
         def decorated_function(*args, **kwargs):
             """ Checks that the media type is correct """
             pattern = re.compile(content_type+'.*')
-            if pattern.match(request.headers['Content-Type']):
-                return f(*args, **kwargs)
+            if 'Content-Type' in request.headers:
+                if pattern.match(request.headers['Content-Type']):
+                    return f(*args, **kwargs)
+                else:
+                    app.logger.error('Invalid Content-Type: %s', request.headers['Content-Type'])
+                    raise UnsupportedMediaType(' Content-Type must be {}'.format(content_type))
             else:
-                app.logger.error('Invalid Content-Type: %s', request.headers['Content-Type'])
-                raise UnsupportedMediaType('Content-Type must be {}'.format(content_type))
+                # provide no content type
+                app.logger.error('Provide No Content-Type')
+                raise UnsupportedMediaType(' Content-Type must be {}'.format(content_type))
         return decorated_function
     return decorater
 
