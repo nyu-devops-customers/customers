@@ -58,8 +58,11 @@ Vagrant.configure(2) do |config|
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
+    # add cloud foundry tool 
+    wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+    echo "deb http://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
     apt-get update
-    apt-get install -y git python-pip python-dev build-essential mysql-client
+    apt-get install -y git cf-cli python-pip python-dev build-essential mysql-client
     pip install --upgrade pip
     apt-get -y autoremove
     # Install app dependencies
