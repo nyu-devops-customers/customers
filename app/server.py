@@ -122,16 +122,17 @@ def list_customers():
 ######################################################################
 # QUERY CUSTOMERS
 ######################################################################
-@app.route('/customers/query', methods=['GET'])
+@app.route('/customer', methods=['GET'])
 @check_content_type('application/json')
 def query_customers():
     """ Query parts of the Customers """
     customers = []
-    request_info = request.get_json()
-    if 'lastname' in request_info:
-        customers = Customer.find_by_lastname(request_info['lastname'])
-    elif 'firstname' in request_info:
-        customers = Customer.find_by_firstname(request_info['firstname'])
+    last_name = request.args.get('lastname')
+    first_name = request.args.get('firstname')
+    if last_name:
+        customers = Customer.find_by_lastname(last_name)
+    elif first_name:
+        customers = Customer.find_by_firstname(first_name)
     else:
         raise BadRequest("should provide firstname or lastname")
     if not customers:
