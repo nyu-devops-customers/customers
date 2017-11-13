@@ -134,9 +134,8 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_customer_list_by_lastname(self):
-        """ Query Customers by Lastname """
-        query_info= {'lastname': 'dog'}
-        resp = self.app.get('/customers/query', data = json.dumps(query_info), content_type='application/json')
+        """ Query Customers by Last Name """
+        resp = self.app.get('/customer?lastname=dog', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(len(resp.data) > 0)
         self.assertTrue('fido' in resp.data)
@@ -146,9 +145,8 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(query_item['lastname'], 'dog')
 
     def test_query_customer_list_by_firstname(self):
-        """ Query Customers by Name """
-        query_info = {'firstname': 'fido'}
-        resp = self.app.get('/customers/query', data = json.dumps(query_info), content_type='application/json')
+        """ Query Customers by Fisrt Name """
+        resp = self.app.get('/customer?firstname=fido', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(len(resp.data) > 0)
         self.assertTrue('fido' in resp.data)
@@ -157,13 +155,12 @@ class TestCustomerServer(unittest.TestCase):
         query_item = data[0]
         self.assertEqual(query_item['firstname'], 'fido')
         server.Customer.remove_all()
-        resp = self.app.get('/customers/query', data = json.dumps(query_info), content_type='application/json')
+        resp = self.app.get('/customers?firstname=fido', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_customer_list_by_unsupported_field(self):
-        """ Query Customers by Name """
-        query_info = {'dump': 'fido'}
-        resp = self.app.get('/customers/query', data = json.dumps(query_info), content_type='application/json')
+        """ Query Customers by None Parameter"""
+        resp = self.app.get('/customer?gender=male', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
