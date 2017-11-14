@@ -44,6 +44,21 @@ class TestCustomers(unittest.TestCase):
         customer = Customer(0, "fido", "dog")
         customer.save()
         self.assertEqual(customer.id, 1)
+        # Upgrade it and save it
+        customer.upgrade()
+        customer.save()
+        self.assertEqual(customer.id, 1)
+        # Fetch it back and make sure the id hasn't changed
+        # but the data did change
+        customers = Customer.all()
+        self.assertEqual(len(customers), 1)
+        self.assertEqual(customers[0].premium, True);
+
+    def test_upgrade_a_Customer(self):
+        """ Upgrade a Customer """
+        customer = Customer(0, "fido", "dog")
+        customer.save()
+        self.assertEqual(customer.id, 1)
         # Change it an save it
         customer.lastname = "k9"
         customer.save()
@@ -53,6 +68,7 @@ class TestCustomers(unittest.TestCase):
         customers = Customer.all()
         self.assertEqual(len(customers), 1)
         self.assertEqual(customers[0].lastname, "k9")
+
 
     def test_delete_a_Customer(self):
         """ Delete a Customer """
