@@ -174,7 +174,11 @@ class TestCustomerServer(unittest.TestCase):
         resp = self.app.get('/customer?gender=male', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-
+    def test_query_no_customer(self):
+        """ Query used when no custome is avaliable """
+        server.Customer.remove_all()
+        resp = self.app.get('/customer?lastname=dog', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_method_not_allowed(self):
          """ Call a Method thats not Allowed """
@@ -210,6 +214,11 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(new_json['credit_level'], 1)
         self.assertEqual(new_json['valid'], True)
 
+    def test_upgrade_credit_of_a_Customer_not_avaliable(self):
+        """ Upgrade the credit of a customer not avaliable"""
+        resp = self.app.put('/customers/4/upgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_downgrade_credit_of_a_Customer(self):
         """ Downgrade the credit of a customer"""
         resp = self.app.put('/customers/2/downgrade-credit', content_type='application/json')
@@ -217,6 +226,33 @@ class TestCustomerServer(unittest.TestCase):
         new_json = json.loads(resp.data)
         self.assertEqual(new_json['credit_level'], -1)
         self.assertEqual(new_json['valid'], False)
+
+    def test_downgrade_credit_of_a_Customer_not_avaliable(self):
+        """ Upgrade the credit of a customer not avaliable"""
+        resp = self.app.put('/customers/4/downgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_the_valid_status_turn_by_credit(self):
+        resp = self.app.put('/customers/2/upgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], 1)
+        self.assertEqual(new_json['valid'], True)
+        resp = self.app.put('/customers/2/downgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], 0)
+        self.assertEqual(new_json['valid'], True)
+        resp = self.app.put('/customers/2/downgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], -1)
+        self.assertEqual(new_json['valid'], False)
+        resp = self.app.put('/customers/2/upgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], 0)
+        self.assertEqual(new_json['valid'], True)
 
 ######################################################################
 # Utility functions
