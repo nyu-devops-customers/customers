@@ -96,6 +96,18 @@ class TestCustomerServer(unittest.TestCase):
         new_json = json.loads(resp.data)
         self.assertEqual(new_json['lastname'], 'tabby')
 
+    def test_update_customer_with_invalid_credit(self):
+        """ Update a Customer with invalid credit """
+        new_kitty = {'firstname': 'kitty', 'lastname': 'tabby', 'valid': True,'credit_level': -1}
+        data = json.dumps(new_kitty)
+        resp = self.app.put('/customers/2', data=data, content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        another_kitty = {'firstname': 'kitty', 'lastname': 'tabby', 'valid': False,'credit_level': 1}
+        data = json.dumps(another_kitty)
+        resp = self.app.put('/customers/2', data=data, content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+
     def test_update_customer_with_no_firstname(self):
         """ Update a Customer with no firstname """
         new_customer = {'lastname': 'dog'}
@@ -176,13 +188,12 @@ class TestCustomerServer(unittest.TestCase):
         # resp = self.app.post('customers', content_type='application/json')
         # self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-    # @patch('server.Customer.find_by_firstname')
-    # def test_mock_search_data_internal_error(self, customer_find_mock):
-        # """ Mocking the  """
-        # customer_find_mock.side_effect = OSError()
-        # query_info= {'firstname': 'fido'}
-        # resp = self.app.get('/customers/query', data = json.dumps(query_info), content_type='application/json')
-        # self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+    @patch('app.server.Customer.find_by_firstname')
+    def test_mock_search_data_internal_error(self, customer_find_mock):
+        """ Mocking the Server Internal Error """
+        customer_find_mock.side_effect = OSError()
+        resp = self.app.get('/customer?firstname=fido', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_415_unsupported_media_type(self):
         """ Update a Customer """
