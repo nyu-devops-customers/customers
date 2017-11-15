@@ -206,7 +206,7 @@ def upgrade_customers_credit(customer_id):
     """
     Increse the credit of a customer
 
-    If the credit of the customer becomes less then zero the customer will be freezed
+    If the credit of the customer becomes more then zero the customer will be defreezed
     """
     customer = Customer.find(customer_id)
     if not customer:
@@ -224,7 +224,7 @@ def upgrade_customers_credit(customer_id):
 @check_content_type('application/json')
 def downgrade_customers_credit(customer_id):
     """
-    Increse the credit of a customer
+    Decrese the credit of a customer
 
     If the credit of the customer becomes less then zero the customer will be freezed
     """
