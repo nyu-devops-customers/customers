@@ -42,6 +42,23 @@ class Customer(object):
         self.id = id
         self.firstname = firstname
         self.lastname = lastname
+        self.valid = True
+        self.credit_level = 0
+        # Customers can freeze their account by themselves
+        # Account with negative credit_level will be freezed automaticlly
+        # Automaticlly freezed customer will be automaticlly defreezed if they gain enough credit
+
+    def upgrade_credit_level(self):
+        """ Upgrade the credit level of the customer"""
+        self.credit_level += 1
+        if self.credit_level >= 0:
+            self.valid = True
+
+    def downgrade_credit_level(self):
+        """ Downgrade the credit level of the customer"""
+        self.credit_level -= 1
+        if self.credit_level < 0:
+            self.valid = False
 
     def save(self):
         """
@@ -62,7 +79,8 @@ class Customer(object):
 
     def serialize(self):
         """ Serializes a Customer into a dictionary """
-        return {"id": self.id, "firstname": self.firstname, "lastname": self.lastname}
+        return {"id": self.id, "firstname": self.firstname, "lastname": self.lastname,
+                "valid": self.valid, "credit_level": self.credit_level}
 
     def deserialize(self, data):
         """
@@ -78,6 +96,17 @@ class Customer(object):
         try:
             self.firstname = data['firstname']
             self.lastname = data['lastname']
+            if(data.has_key('valid') and data.has_key('credit_level')):
+                self.valid= data['valid']
+                self.credit_level = data['credit_level']
+                if self.credit_level < 0 and self.valid == True:
+                    raise DataValidationError('Invalid Customer: Customer with negative credit should not be valid')
+                if self.credit_level >= 0 and self.valid == False:
+                    raise DataValidationError('Invalid Customer: Customer with non-negative credit should be valid')
+            else:
+                #default credit level and
+                self.valid = True
+                self.credit_level = 0
         except KeyError as err:
             raise DataValidationError('Invalid Customer: missing ' + err.args[0])
         return
