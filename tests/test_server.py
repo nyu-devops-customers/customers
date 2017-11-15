@@ -96,6 +96,17 @@ class TestCustomerServer(unittest.TestCase):
         new_json = json.loads(resp.data)
         self.assertEqual(new_json['lastname'], 'tabby')
 
+    def test_update_customer_with_invalid_credit(self):
+        """ Update a Customer with invalid credit """
+        new_kitty = {'firstname': 'kitty', 'lastname': 'tabby', 'valid': True,'credit_level': -1}
+        data = json.dumps(new_kitty)
+        resp = self.app.put('/customers/2', data=data, content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        another_kitty = {'firstname': 'kitty', 'lastname': 'tabby', 'valid': False,'credit_level': 1}
+        data = json.dumps(another_kitty)
+        resp = self.app.put('/customers/2', data=data, content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_update_customer_with_no_firstname(self):
         """ Update a Customer with no firstname """
         new_customer = {'lastname': 'dog'}
@@ -163,6 +174,11 @@ class TestCustomerServer(unittest.TestCase):
         resp = self.app.get('/customer?gender=male', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_query_no_customer(self):
+        """ Query used when no custome is avaliable """
+        server.Customer.remove_all()
+        resp = self.app.get('/customer?lastname=dog', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_method_not_allowed(self):
          """ Call a Method thats not Allowed """
@@ -176,21 +192,67 @@ class TestCustomerServer(unittest.TestCase):
         # resp = self.app.post('customers', content_type='application/json')
         # self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-    # @patch('server.Customer.find_by_firstname')
-    # def test_mock_search_data_internal_error(self, customer_find_mock):
-        # """ Mocking the  """
-        # customer_find_mock.side_effect = OSError()
-        # query_info= {'firstname': 'fido'}
-        # resp = self.app.get('/customers/query', data = json.dumps(query_info), content_type='application/json')
-        # self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+    @patch('app.server.Customer.find_by_firstname')
+    def test_mock_search_data_internal_error(self, customer_find_mock):
+        """ Mocking the Server Internal Error """
+        customer_find_mock.side_effect = OSError()
+        resp = self.app.get('/customer?firstname=fido', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_415_unsupported_media_type(self):
-        """ Update a Customer """
+        """ Test the media type checking handler """
         new_kitty = {'firstname': 'kitty', 'lastname': 'tabby'}
         data = json.dumps(new_kitty)
         resp = self.app.put('/customers/2', data= data, content_type='string')
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
+    def test_upgrade_credit_of_a_Customer(self):
+        """ Upgrade the credit of a customer"""
+        resp = self.app.put('/customers/2/upgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], 1)
+        self.assertEqual(new_json['valid'], True)
+
+    def test_upgrade_credit_of_a_Customer_not_avaliable(self):
+        """ Upgrade the credit of a customer not avaliable"""
+        resp = self.app.put('/customers/4/upgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_downgrade_credit_of_a_Customer(self):
+        """ Downgrade the credit of a customer"""
+        resp = self.app.put('/customers/2/downgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], -1)
+        self.assertEqual(new_json['valid'], False)
+
+    def test_downgrade_credit_of_a_Customer_not_avaliable(self):
+        """ Upgrade the credit of a customer not avaliable"""
+        resp = self.app.put('/customers/4/downgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_the_valid_status_turn_by_credit(self):
+        resp = self.app.put('/customers/2/upgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], 1)
+        self.assertEqual(new_json['valid'], True)
+        resp = self.app.put('/customers/2/downgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], 0)
+        self.assertEqual(new_json['valid'], True)
+        resp = self.app.put('/customers/2/downgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], -1)
+        self.assertEqual(new_json['valid'], False)
+        resp = self.app.put('/customers/2/upgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], 0)
+        self.assertEqual(new_json['valid'], True)
 
 ######################################################################
 # Utility functions

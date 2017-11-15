@@ -198,6 +198,46 @@ def update_customers(customer_id):
 
 
 ######################################################################
+# UPGRAGE CREDIT LEVEL OF A CUSTOMER
+######################################################################
+@app.route('/customers/<int:customer_id>/upgrade-credit', methods=['PUT'])
+@check_content_type('application/json')
+def upgrade_customers_credit(customer_id):
+    """
+    Increse the credit of a customer
+
+    If the credit of the customer becomes more then zero the customer will be defreezed
+    """
+    customer = Customer.find(customer_id)
+    if not customer:
+        raise NotFound("Customer with id '{}' was not found.".format(customer_id))
+    customer.upgrade_credit_level()
+    customer.id = customer_id
+    customer.save()
+    return make_response(jsonify(customer.serialize()), status.HTTP_200_OK)
+
+
+######################################################################
+# DOWNGRAGE CREDIT LEVEL OF A CUSTOMER
+######################################################################
+@app.route('/customers/<int:customer_id>/downgrade-credit', methods=['PUT'])
+@check_content_type('application/json')
+def downgrade_customers_credit(customer_id):
+    """
+    Decrese the credit of a customer
+
+    If the credit of the customer becomes less then zero the customer will be freezed
+    """
+    customer = Customer.find(customer_id)
+    if not customer:
+        raise NotFound("Customer with id '{}' was not found.".format(customer_id))
+    customer.downgrade_credit_level()
+    customer.id = customer_id
+    customer.save()
+    return make_response(jsonify(customer.serialize()), status.HTTP_200_OK)
+
+
+######################################################################
 # DELETE A CUSTOMER
 ######################################################################
 @app.route('/customers/<int:customer_id>', methods=['DELETE'])

@@ -39,6 +39,50 @@ class TestCustomers(unittest.TestCase):
         customers = Customer.all()
         self.assertEqual(len(customers), 1)
 
+    def test_upgrade_credit_of_a_Customer(self):
+        """ Upgrade credit of a Customer """
+        customer = Customer(0, "fido", "dog")
+        customer.save()
+        self.assertEqual(customer.id, 1)
+        self.assertEqual(customer.valid, True)
+        # Upgrade it and save it
+        customer.upgrade_credit_level()
+        customer.save()
+        self.assertEqual(customer.id, 1)
+        self.assertEqual(customer.valid, True)
+        self.assertEqual(customer.credit_level, 1)
+        customer.upgrade_credit_level()
+        customer.save()
+        self.assertEqual(customer.credit_level, 2)
+        # Fetch it back and make sure the id hasn't changed
+        # but the data did change
+        customers = Customer.all()
+        self.assertEqual(len(customers), 1)
+        self.assertEqual(customers[0].valid, True);
+
+    def test_downgrade_credit_of_a_Customer(self):
+        """ Downgrade credit of a Customer """
+        customer = Customer(0, "fido", "dog")
+        customer.save()
+        self.assertEqual(customer.id, 1)
+        self.assertEqual(customer.valid, True)
+        self.assertEqual(customer.credit_level, 0)
+        # Downgrade it and save it
+        customer.downgrade_credit_level()
+        customer.save()
+        self.assertEqual(customer.id, 1)
+        self.assertEqual(customer.valid, False)
+        self.assertEqual(customer.credit_level, -1)
+        customer.upgrade_credit_level()
+        customer.save()
+        self.assertEqual(customer.credit_level, 0)
+
+        # Fetch it back and make sure the id hasn't changed
+        # but the data did change
+        customers = Customer.all()
+        self.assertEqual(len(customers), 1)
+        self.assertEqual(customers[0].valid, True);
+
     def test_update_a_Customer(self):
         """ Update a Customer """
         customer = Customer(0, "fido", "dog")
@@ -53,6 +97,7 @@ class TestCustomers(unittest.TestCase):
         customers = Customer.all()
         self.assertEqual(len(customers), 1)
         self.assertEqual(customers[0].lastname, "k9")
+
 
     def test_delete_a_Customer(self):
         """ Delete a Customer """
@@ -74,21 +119,26 @@ class TestCustomers(unittest.TestCase):
         self.assertEqual(data['firstname'], "fido")
         self.assertIn('lastname', data)
         self.assertEqual(data['lastname'], "dog")
+        self.assertEqual(data['valid'], True)
+        self.assertEqual(data['credit_level'], 0)
+
 
     def test_deserialize_a_Customer(self):
         """ Test deserialization of a Customer """
-        data = {"id": 1, "firstname": "kitty", "lastname": "cat"}
+        data = {"id": 1, "firstname": "kitty", "lastname": "cat", "valid": True, "credit_level": 1}
         customer = Customer()
         customer.deserialize(data)
         self.assertNotEqual(customer, None)
         self.assertEqual(customer.id, 1)
         self.assertEqual(customer.firstname, "kitty")
         self.assertEqual(customer.lastname, "cat")
+        self.assertEqual(customer.valid, True)
+        self.assertEqual(customer.credit_level, 1)
 
     def test_deserialize_with_no_name(self):
         """ Deserialize a Customer without a name """
         customer = Customer()
-        data = {"id":0, "category": "cat"}
+        data = {"id":0, "lastname": "cat"}
         self.assertRaises(DataValidationError, customer.deserialize, data)
 
     def test_deserialize_with_no_data(self):
@@ -100,6 +150,16 @@ class TestCustomers(unittest.TestCase):
         """ Deserailize a Customer with bad data """
         customer = Customer()
         self.assertRaises(DataValidationError, customer.deserialize, "data")
+
+    def test_deserialize_with_invalid_credit_data(self):
+        """ Deserailize a Customer with bad data """
+        customer = Customer()
+        data = {"id": 1, "firstname": "kitty", "lastname": "cat",
+            "valid": True, "credit_level": -1}
+        self.assertRaises(DataValidationError, customer.deserialize, data)
+        data = {"id": 1, "firstname": "kitty", "lastname": "cat",
+            "valid": False, "credit_level": 1}
+        self.assertRaises(DataValidationError, customer.deserialize, data)
 
     def test_find_Customer(self):
         """ Find a Customer by ID """
