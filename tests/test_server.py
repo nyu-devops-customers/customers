@@ -107,7 +107,6 @@ class TestCustomerServer(unittest.TestCase):
         resp = self.app.put('/customers/2', data=data, content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-
     def test_update_customer_with_no_firstname(self):
         """ Update a Customer with no firstname """
         new_customer = {'lastname': 'dog'}
@@ -176,6 +175,7 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
+
     def test_method_not_allowed(self):
          """ Call a Method thats not Allowed """
          resp = self.app.post('/customers/0')
@@ -196,12 +196,27 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_415_unsupported_media_type(self):
-        """ Update a Customer """
+        """ Test the media type checking handler """
         new_kitty = {'firstname': 'kitty', 'lastname': 'tabby'}
         data = json.dumps(new_kitty)
         resp = self.app.put('/customers/2', data= data, content_type='string')
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
+    def test_upgrade_credit_of_a_Customer(self):
+        """ Upgrade the credit of a customer"""
+        resp = self.app.put('/customers/2/upgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], 1)
+        self.assertEqual(new_json['valid'], True)
+
+    def test_downgrade_credit_of_a_Customer(self):
+        """ Downgrade the credit of a customer"""
+        resp = self.app.put('/customers/2/downgrade-credit', content_type='application/json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['credit_level'], -1)
+        self.assertEqual(new_json['valid'], False)
 
 ######################################################################
 # Utility functions
