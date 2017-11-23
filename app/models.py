@@ -47,7 +47,6 @@ class DataValidationError(Exception):
 ######################################################################
 # Customer Model for database
 ######################################################################
-
 class Customer(db.Model):
     """A single customer"""
     logger = logging.getLogger(__name__)
@@ -128,6 +127,7 @@ class Customer(db.Model):
                                       'bad or no data')
         return self
 
+
 ######################################################################
 #  S T A T I C   D A T A B S E   M E T H O D S
 ######################################################################
@@ -148,6 +148,7 @@ class Customer(db.Model):
         """ Removes all Customers from the database """
         Customer.logger.info('Removing all Customers')
         db.session.expunge_all()
+
 
 ######################################################################
 #  F I N D E R   M E T H O D S
