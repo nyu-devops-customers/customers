@@ -20,79 +20,93 @@ Models
 ------
 Customer - A Customer used in the Store
 
+Attributes:
+-----------
+id : int
+firstname : string
+lastname: string
+valid: boolean
+credit_level: int
+
 """
-import threading
+
+"""
+This model uses SQLAlchemy to persist itself
+"""
+
+import os
+import json
+import logging
+from . import db
+
 
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
     pass
 
-class Customer(object):
-    """
-    Class that represents a Customer
+######################################################################
+# Customer Model for database
+######################################################################
 
-    This version uses an in-memory collection of Customers for testing
-    """
-    lock = threading.Lock()
-    data = []
-    index = 0
+class Customer(db.Model):
+    """A single customer"""
+    logger = logging.getLogger(__name__)
 
-    def __init__(self, id=0, firstname='', lastname=''):
+    # Table Schema
+    id = db.Column(db.Integer, primary_key=True)
+    firstname = db.Column(db.String(63))
+    lastname = db.Column(db.String(63))
+    valid = db.Column(db.Boolean())
+    credit_level = db.Column(db.Integer)
+
+    def __repr__(self):
+        return '<Customer %r>' % (self.lastname)
+
+    def __init__(self, id=0, firstname= None, lastname= None, valid= True, credit_level=0):
         """ Initialize a Customer """
         self.id = id
         self.firstname = firstname
         self.lastname = lastname
-        self.valid = True
+        self.valid = valid
         self.credit_level = 0
         # Customers can freeze their account by themselves
         # Account with negative credit_level will be freezed automaticlly
         # Automaticlly freezed customer will be automaticlly defreezed if they gain enough credit
 
     def upgrade_credit_level(self):
-        """ Upgrade the credit level of the customer"""
+        """ Upgrade the credit level of the customer """
         self.credit_level += 1
         if self.credit_level >= 0:
             self.valid = True
 
     def downgrade_credit_level(self):
-        """ Downgrade the credit level of the customer"""
+        """ Downgrade the credit level of the customer """
         self.credit_level -= 1
         if self.credit_level < 0:
             self.valid = False
 
     def save(self):
-        """
-        Saves a Customer to the data store
-        """
-        if self.id == 0:
-            self.id = self.__next_index()
-            Customer.data.append(self)
-        else:
-            for i in range(len(Customer.data)):
-                if Customer.data[i].id == self.id:
-                    Customer.data[i] = self
-                    break
+        """ Saves an existing Customer in the database """
+        # if the id is None it hasn't been added to the database
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
 
     def delete(self):
-        """ Removes a Customer from the data store """
-        Customer.data.remove(self)
+        """ Deletes a Customer from the database """
+        db.session.delete(self)
+        db.session.commit()
 
     def serialize(self):
         """ Serializes a Customer into a dictionary """
-        return {"id": self.id, "firstname": self.firstname, "lastname": self.lastname,
-                "valid": self.valid, "credit_level": self.credit_level}
+        return {"id": self.id,
+                "firstname": self.firstname,
+                "lastname": self.lastname,
+                "valid": self.valid,
+                "credit_level": self.credit_level}
 
     def deserialize(self, data):
-        """
-        Deserializes a Customer from a dictionary
-
-        Args:
-            data (dict): A dictionary containing the Customer data
-        """
-        if not isinstance(data, dict):
-            raise DataValidationError('Invalid Customer: body of request contained bad or no data')
-        if data.has_key('id'):
-            self.id = data['id']
+        """ deserializes a Customer my marshalling the data """
         try:
             self.firstname = data['firstname']
             self.lastname = data['lastname']
@@ -107,53 +121,56 @@ class Customer(object):
                 #default credit level and
                 self.valid = True
                 self.credit_level = 0
-        except KeyError as err:
+        except KeyError as error:
             raise DataValidationError('Invalid Customer: missing ' + err.args[0])
-        return
+        except TypeError as error:
+            raise DataValidationError('Invalid customer: body of request contained' \
+                                      'bad or no data')
+        return self
 
+######################################################################
+#  S T A T I C   D A T A B S E   M E T H O D S
+######################################################################
     @staticmethod
-    def __next_index():
-        """ Generates the next index in a continual sequence """
-        with Customer.lock:
-            Customer.index += 1
-        return Customer.index
+    def init_db():
+        """ Initializes the database session """
+        Customer.logger.info('Initializing database')
+        db.create_all()  # make our sqlalchemy tables
 
     @staticmethod
     def all():
-        """ Returns all of the Customers in the database """
-        return [customer for customer in Customer.data]
+        """ Query that returns all Customers """
+        Customer.logger.info('Processing all Customers')
+        return Customer.query.all()
 
     @staticmethod
     def remove_all():
-        """ Removes all of the Customers from the database """
-        del Customer.data[:]
-        Customer.index = 0
-        return Customer.data
+        """ Removes all Customers from the database """
+        Customer.logger.info('Removing all Customers')
+        db.session.expunge_all()
 
+######################################################################
+#  F I N D E R   M E T H O D S
+######################################################################
     @staticmethod
     def find(customer_id):
-        """ Finds a Customer by it's ID """
-        if not Customer.data:
-            return None
-        customers = [customer for customer in Customer.data if customer.id == customer_id]
-        if customers:
-            return customers[0]
-        return None
+        """ Query that finds Customers by their id """
+        Customer.logger.info('Processing lookup for id %s ...', customer_id)
+        return Customer.query.get(customer_id)
+
+    @staticmethod
+    def find_or_404(customer_id):
+        """ Find a Customer by his id """
+        Customer.logger.info('Processing lookup or 404 for id %s ...', customer_id)
+        return Customer.query.get_or_404(customer_id)
 
     @staticmethod
     def find_by_lastname(lastname):
-        """ Returns all of the Customers in a lastname
-
-        Args:
-            lastname (string): the lastname of the Customers you want to match
-        """
-        return [customer for customer in Customer.data if customer.lastname == lastname]
+        """ Query that finds Customers by their lastname """
+        Customer.logger.info('Processing name query for %s ...', lastname)
+        return Customer.query.filter(Customer.lastname == lastname)
 
     @staticmethod
     def find_by_firstname(firstname):
-        """ Returns all Customers with the given firstname
-
-        Args:
-            firstname (string): the firstname of the Customers you want to match
-        """
-        return [customer for customer in Customer.data if customer.firstname == firstname]
+        """ Query that finds Customers by their firstname """
+        Customer.logger.info('Processing name query for %s ...', firstname)
