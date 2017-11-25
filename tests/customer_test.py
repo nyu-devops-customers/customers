@@ -47,7 +47,11 @@ class TestCustomers(unittest.TestCase):
         self.assertEqual(customer.id, None)
         self.assertEqual(customer.firstname, "fido")
         self.assertEqual(customer.lastname, "dog")
+        # import pdb; pdb.set_trace()
         customer.save()
+        # the defalut values of the credit level and valid status should be set
+        self.assertEqual(customer.credit_level, 0);
+        self.assertEqual(customer.valid, True);
         # Asert that it was assigned an id and shows up in the database
         self.assertEqual(customer.id, 1)
         customers = Customer.all()

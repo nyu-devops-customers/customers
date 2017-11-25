@@ -55,8 +55,8 @@ class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(63))
     lastname = db.Column(db.String(63))
-    valid = db.Column(db.Boolean())
-    credit_level = db.Column(db.Integer)
+    valid = db.Column(db.Boolean(), default=True)
+    credit_level = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return '<Customer %r>' % (self.lastname)
