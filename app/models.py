@@ -105,11 +105,6 @@ class Customer(db.Model):
                     raise DataValidationError('Invalid Customer: Customer with negative credit should not be valid')
                 if self.credit_level >= 0 and self.valid == False:
                     raise DataValidationError('Invalid Customer: Customer with non-negative credit should be valid')
-            else:
-                #default credit level and
-                # this is buggy
-                self.valid = True
-                self.credit_level = 0
         except KeyError as error:
             raise DataValidationError('Invalid Customer: missing ' + err.args[0])
         except TypeError as error:
