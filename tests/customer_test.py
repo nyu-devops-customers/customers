@@ -4,27 +4,55 @@
 
 """ Test cases for Customer Model """
 
-import unittest
 
+import os
+import unittest
+from app import app, db
 from app.models import Customer
 from app.models import DataValidationError
+
+# DATABASE_URI = 'mysql+pymysql://root:passw0rd@localhost:3306/test'
+DATABASE_URI = os.getenv('DATABASE_URI', None)
 
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
 class TestCustomers(unittest.TestCase):
     """ Test Cases for Customers """
+    @classmethod
+    def setUpClass(cls):
+        app.debug = False
+        # Set up the test database
+        if DATABASE_URI:
+            app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
 
     def setUp(self):
-        Customer.remove_all()
+        #Pet.init_db()
+        db.drop_all()    # clean up the last tests
+        db.create_all()  # make our sqlalchemy tables
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
 
     def test_create_a_Customer(self):
         """ Create a Customer and assert that it exists """
-        customer = Customer(0, "fido", "dog")
+        # import pdb; pdb.set_trace()
+        customer = Customer(firstname="fido", lastname="dog")
         self.assertTrue(customer != None)
-        self.assertEqual(customer.id, 0)
+        self.assertEqual(customer.id, None)
         self.assertEqual(customer.firstname, "fido")
         self.assertEqual(customer.lastname, "dog")
+        customer.save()
+        # Asert that it was assigned an id and shows up in the database
+        self.assertEqual(customer.id, 1)
+        customers = Customer.all()
+        self.assertEqual(len(customers), 1)
+
 
     def test_add_a_Customer(self):
         """ Create a Customer and add it to the database """

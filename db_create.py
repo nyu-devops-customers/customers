@@ -33,7 +33,6 @@ if len(sys.argv) > 1:
     )
 
 print('Database URI {}'.format(app.config['SQLALCHEMY_DATABASE_URI']))
-
 try:
     print "Creating database tables"
     db.create_all()

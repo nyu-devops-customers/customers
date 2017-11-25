@@ -61,17 +61,6 @@ class Customer(db.Model):
     def __repr__(self):
         return '<Customer %r>' % (self.lastname)
 
-    def __init__(self, id=0, firstname= None, lastname= None, valid= True, credit_level=0):
-        """ Initialize a Customer """
-        self.id = id
-        self.firstname = firstname
-        self.lastname = lastname
-        self.valid = valid
-        self.credit_level = 0
-        # Customers can freeze their account by themselves
-        # Account with negative credit_level will be freezed automaticlly
-        # Automaticlly freezed customer will be automaticlly defreezed if they gain enough credit
-
     def upgrade_credit_level(self):
         """ Upgrade the credit level of the customer """
         self.credit_level += 1
@@ -118,6 +107,7 @@ class Customer(db.Model):
                     raise DataValidationError('Invalid Customer: Customer with non-negative credit should be valid')
             else:
                 #default credit level and
+                # this is buggy
                 self.valid = True
                 self.credit_level = 0
         except KeyError as error:
