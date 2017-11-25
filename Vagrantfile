@@ -40,7 +40,8 @@ Vagrant.configure(2) do |config|
     d.pull_images "centurylink/mysql:5.5"
     d.pull_images "redis:alpine"
     d.run "centurylink/mysql:5.5",
-      args: "-d --name mysql -p 3306:3306 -v /home/ubuntu/data/mysql:/var/lib/mysql"
+      args: "-d --name mysql -p 3306:3306 -v /home/ubuntu/data/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=passw0rd"
+
     d.run "redis:alpine",
       args: "-d --name redis -p 6379:6379 -v /home/ubuntu/data/redis:/data"
   end
@@ -70,6 +71,16 @@ Vagrant.configure(2) do |config|
     sudo pip install -r requirements.txt
     # Make vi look nice
     # sudo -H -u ubuntu echo "colorscheme desert" > ~/.vimrc
+  SHELL
+
+  # Create the database after Docker is running
+  config.vm.provision "shell", inline: <<-SHELL
+    # Wait for mariadb to come up
+    echo "Waiting 20 seconds for mariadb to start..."
+    sleep 20
+    cd /vagrant
+    python db_create.py development
+    python db_create.py test
   SHELL
 
 end

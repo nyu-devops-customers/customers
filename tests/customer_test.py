@@ -3,20 +3,37 @@
 # coverage report -m
 
 """ Test cases for Customer Model """
-
+import os
 import unittest
-
 from app.models import Customer
 from app.models import DataValidationError
+from app import app,db
 
+DATABASE_URI = os.getenv('DATABASE_URI', None)
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
 class TestCustomers(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        app.debug = False
+        # Set up the test database
+        if DATABASE_URI:
+            app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
     """ Test Cases for Customers """
 
     def setUp(self):
-        Customer.remove_all()
+	db.drop_all()    # clean up the last tests
+        db.create_all()  # make our sqlalchemy tables
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
 
     def test_create_a_Customer(self):
         """ Create a Customer and assert that it exists """

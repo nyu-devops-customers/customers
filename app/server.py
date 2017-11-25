@@ -22,18 +22,21 @@ GET /customers/{id} - Returns the Customer with a given id number
 POST /customers - creates a new Customer record in the database
 PUT /customers/{id} - updates a Customer record in the database
 DELETE /customers/{id} - deletes a Customer record in the database
+PUT /customers/{id}/upgrade-credit - updates a Customer credit_level record in the database
+PUT /customers/{id}/downgrade-credit - updates a Customer credit_level record in the database
 """
 
 import os, re
 import sys
 import logging
 from functools import wraps
-from flask import Flask, jsonify, request, url_for, make_response
+from flask import Flask, jsonify, request, url_for, make_response, abort
 from flask_api import status    # HTTP Status Codes
 from werkzeug.exceptions import NotFound, UnsupportedMediaType, BadRequest
 from app.models import Customer, DataValidationError
 
 from . import app
+
 
 ######################################################################
 # Error Handlers
@@ -98,6 +101,7 @@ def check_content_type(content_type):
         return decorated_function
     return decorater
 
+
 ######################################################################
 # GET INDEX
 ######################################################################
@@ -105,6 +109,7 @@ def check_content_type(content_type):
 def index():
     """ Root URL response """
     return app.send_static_file('index.html')
+
 
 ######################################################################
 # LIST ALL CUSTOMERS
@@ -139,6 +144,7 @@ def query_customers():
         raise NotFound("No Customers Found")
     results = [customer.serialize() for customer in customers]
     return make_response(jsonify(results), status.HTTP_200_OK)
+
 
 ######################################################################
 # RETRIEVE A CUSTOMER
@@ -253,10 +259,15 @@ def delete_customers(customer_id):
         customer.delete()
     return make_response('', status.HTTP_204_NO_CONTENT)
 
+
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
+def init_db():
+    """ Initialies the SQLAlchemy app """
+    Customer.init_db()
 
+#@app.before_first_request
 def initialize_logging(log_level):
     """ Initialized the default logging to STDOUT """
     if not app.debug:
