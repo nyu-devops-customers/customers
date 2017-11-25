@@ -1,63 +1,169 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
-    <head>
-        <script type="text/javascript" src = "static/jquery-3.1.1.min.js"></script>
-        <script type="text/javascript" src="static/customer.js"></script>
-    </head>
-    <body>
-        <div class = "header">
-            <h3>Customer serverice by Alpha</h3>
+  <head>
+    <title>Customers RESTful Service</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="stylesheet" href="static/css/blue_bootstrap.min.css">
+    <script type="text/javascript" src = "static/js/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="static/js/rest_api.js"></script> -->
+    <link rel="stylesheet" href="static/css/blue_bootstrap.min.css">
+    <script type="text/javascript" src = "static/js/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="static/js/rest_api.js"></script>
+  </head>
+  <body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Customers REST API Service</h1>
         </div>
-        <hr />
-        <div class = "create">
-            <h4>Create Customer</h3>
-            <label>Enter First Name:</label>
-            <input type="text" id="create_first_name">
-            <label>Enter Last Name:</label>
-            <input type="text" id="create_last_name">
-            <button id = "create-btn">Create</button>
-            <br>
-            <div class = "create-display">
-                <div id="create_result_id"></div>
-                <div id="create_result_name"></div>
-            </div>
-        </div>
-        <br><hr />
-        <div class = "retrive">
-            <h4>Retrive Info</h3>
-            <label>Enter ID:</label>
-            <input type="text" id="retrive_id">
-            <button id = "retrive-btn">Retrive</button>
-            <br><div class = "retrive-display">
-                <div id="retrive_result_id"></div>
-                <div id="retrive_result_name"></div>
-            </div>
-        </div>
-        <br><hr />
-        <div class = "update">
-            <h4>Update Info</h3>
-            <label>Enter First Name:</label>
-            <input type="text" id="update_first_name">
-            <label>Enter Last Name:</label>
-            <input type="text" id="update_last_name">
-            <label>Enter ID:</label>
-            <input type="text" id="update_id">
-            <button id = "update-btn">Update</button>
-            <br><div class = "update-display">
-                <div id="update_result_id"></div>
-                <div id="update_result_name"></div>
-            </div>
-        </div>
-        <br><hr />
-        <div class = "delete">
-            <h4>Delete Info</h3>
-            <label>Enter ID:</label>
-            <input type="text" id="delete_id">
-            <button id = "delete-btn">Delete</button>
-            <br><div class = "delete-display">
-                <div id="delete_result"></div>
-            </div>
-        </div>
-    </body>
 
+        <!-- Flash Message -->
+        <div class="table-responsive">
+          <table class="table">
+            <tr><td>Status:</td><td><span id="flash_message"></span></td></tr>
+          </table>
+        </div>
+
+        <div class="col-md-12" id="form_data">
+          <div class="well">
+            Retrieve a Pet:
+            <div class="form-horizontal">
+              <div class="form-group">
+                <label class="control-label col-sm-2" for="id_to_retrive">Pet ID:</label>
+                <div class="col-sm-3">
+                  <input type="text" class="form-control" id="id_to_retrive" placeholder="Enter ID of Customers">
+                </div>
+                <div class="col-sm-4">
+                  <button type="submit" class="btn btn-primary" id="retrieve-btn">Retrieve</button>
+                </div>
+              </div>
+            </div> <!-- form div -->
+            <!-- Retrive Results -->
+            <div class="panel panel-default" id="retrieve_panel" style="border:solid;display:none">
+              <div class="panel-heading">
+                Retrieve Results
+              </div>
+              <div class="panel-body" id="retrieve_results"></div>
+            </div>
+          </div> <!-- form div -->
+
+          <div class="well">
+            Delete a Pet:
+            <div class="form-horizontal">
+              <div class="form-group">
+                <label class="control-label col-sm-2" for="id_to_delete">Pet ID:</label>
+                <div class="col-sm-3">
+                  <input type="text" class="form-control" id="id_to_delete" placeholder="Enter ID of Customers">
+                </div>
+                <div class="col-sm-4">
+                  <button type="submit" class="btn btn-danger" id="delete-btn">Delete</button>
+                </div>
+              </div>
+            </div> <!-- form div -->
+          </div> <!-- form div -->
+
+          <div class="well">
+            Create a Pet:
+            <div class="form-horizontal">
+              <div class="form-group">
+                <label class="control-label col-sm-2" for="first_name_to_create">First Name:</label>
+                <div class="col-sm-3">
+                  <input type="text" class="form-control" id="first_name_to_create" placeholder="Enter First Name">
+                </div>
+                <label class="control-label col-sm-2" for="last_name_to_create">Last Name:</label>
+                <div class="col-sm-3">
+                  <input type="text" class="form-control" id="last_name_to_create" placeholder="Enter Last Name">
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                  <button type="submit" class="btn btn-success" id="create-btn">Create</button>
+                </div>
+              </div>
+            </div> <!-- form div -->
+
+            <!-- Create Results -->
+            <div class="panel panel-default" id="create_panel" style="border:solid;display:none">
+              <div class="panel-heading">
+                Create Results
+              </div>
+              <div class="panel-body" id="create_results"></div>
+            </div>
+
+          </div>
+
+        <div class="well">
+          Update a Pet:
+          <div class="form-horizontal">
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="id_to_update">Pet ID:</label>
+              <div class="col-sm-3">
+                <input type="text" class="form-control" id="id_to_update" placeholder="Enter ID of Customers">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="first_name_to_update">First Name:</label>
+              <div class="col-sm-3">
+                <input type="text" class="form-control" id="first_name_to_update" placeholder="Enter First Name">
+              </div>
+              <label class="control-label col-sm-2" for="last_name_to_update">Last Name:</label>
+              <div class="col-sm-3">
+                <input type="text" class="form-control" id="last_name_to_update" placeholder="Enter Last Name">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-warning" id="update-btn">Update</button>
+              </div>
+            </div>
+          </div> <!-- form div -->
+          <!-- Search Results -->
+          <div class="panel panel-default" id="update_panel" style="border:solid;display:none">
+            <div class="panel-heading">
+              Update Results
+            </div>
+            <div class="panel-body" id="update_results"></div>
+          </div>
+        </div>
+
+        <div class="well">
+          Search for a Pet:
+          <div class="form-horizontal">
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="first_name_to_search">First Name:</label>
+              <div class="col-sm-3">
+                <input type="text" class="form-control" id="first_name_to_search" placeholder="Enter First Name">
+              </div>
+              <label class="control-label col-sm-2" for="last_name_to_search">Last Name:</label>
+              <div class="col-sm-3">
+                <input type="text" class="form-control" id="last_name_to_search" placeholder="Enter Last Name">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary" id="search-btn">Search</button>
+              </div>
+            </div>
+          </div> <!-- form div -->
+
+          <!-- Search Results -->
+          <div class="panel panel-default" id="search_panel" style="border:solid;display:none">
+            <div class="panel-heading">
+              Search Results
+            </div>
+            <div class="panel-body" id="search_results"></div>
+          </div>
+
+        </div>
+
+        <footer>
+          <br><br>
+          <p>&copy; NYU DevOps Company 2017</p>
+        </footer>
+        </div><!--/span-->
+     </div><!--/row-->
+
+  </div><!-- container -->
+  </body>
 </html>
