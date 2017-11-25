@@ -1,17 +1,20 @@
-# Test cases can be run with:
+#Test cases can be run with:
 # nosetests
 # coverage report -m
 
 """ Test cases for the Customer Service """
 
+import os
 import logging
 import unittest
 import json
 from mock import MagicMock, patch
 from flask_api import status    # HTTP Status Codes
 
-import app.server as server
+from app.models import Customer
+from app import server, db
 
+DATABASE_URI = os.getenv('DATABASE_URI', None)
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
@@ -23,17 +26,28 @@ class TestCustomerServer(unittest.TestCase):
         """ Run once before all tests """
         server.app.debug = False
         server.initialize_logging(logging.ERROR)
+ 	# Set up the test database
+        if DATABASE_URI:
+            server.app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
 
     def setUp(self):
-        """ Runs before each test """
-        server.Customer.remove_all()
-        server.Customer(0, 'fido', 'dog').save()
-        server.Customer(0, 'kitty', 'cat').save()
+        server.init_db()
+        db.drop_all()    # clean up the last tests
+        db.create_all()  # create new tables
+	""" Runs before each test """
+        Customer(0, 'fido', 'dog').save()
+        Customer(0, 'kitty', 'cat').save()
         self.app = server.app.test_client()
 
     def tearDown(self):
         """ Runs after each test """
-        server.Customer.remove_all()
+        db.session.remove()
+        db.drop_all()
+
 
     def test_index(self):
         """ Test the Home Page """
@@ -47,8 +61,11 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = json.loads(resp.data)
         self.assertEqual(len(data), 2)
-        server.Customer.remove_all()
-        resp = self.app.get('/customers')
+        #server.Customer.remove_all()
+        db.session.remove()
+        db.drop_all()
+
+	resp = self.app.get('/customers')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_customer(self):
@@ -165,8 +182,11 @@ class TestCustomerServer(unittest.TestCase):
         data = json.loads(resp.data)
         query_item = data[0]
         self.assertEqual(query_item['firstname'], 'fido')
-        server.Customer.remove_all()
-        resp = self.app.get('/customers?firstname=fido', content_type='application/json')
+        #server.Customer.remove_all()
+        db.session.remove()
+        db.drop_all()
+
+	resp = self.app.get('/customers?firstname=fido', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_customer_list_by_unsupported_field(self):
