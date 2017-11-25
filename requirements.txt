@@ -14,3 +14,8 @@ expects==0.8.0
 coverage==4.2
 codecov==2.0.5
 redis==2.10.6
+#database
+Flask-SQLAlchemy==2.1
+SQLAlchemy==1.1.5
+PyMySQL==0.7.11
+
