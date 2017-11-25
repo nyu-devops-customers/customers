@@ -97,7 +97,8 @@ When you are done, you can use `Ctrl+C` to stop the server and then exit and shu
 	 $ vagrant halt
 	 
 	 
-## Structure of application
+## What's featured in the project?
+
 **Procfile** - Contains the command to run when you application starts on Bluemix. It is represented in the form `web: <command>` where `<command>` in this sample case is to run the `py` command and passing in the the `server.py` script.
 
 **requirements.txt** - Contains the external python packages that are required by the application. 
@@ -117,4 +118,9 @@ When you are done, you can use `Ctrl+C` to stop the server and then exit and shu
 **Customer_test.py** -- test cases only for customer model
 
 **models.py** -- hold model definitions of resource
+
+**vcap_services.py** -- Cloud Foundry VCAP_SERVICES support
+
+**db_create.py** -- used to create the database
+
 
