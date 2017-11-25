@@ -11,8 +11,7 @@ Vagrant.configure(2) do |config|
   config.vm.define "alpha" do |alpha|
       alpha.vm.box = "ubuntu/xenial64"
       # set up network ip and port forwarding
-      # alpha.vm.network "forwarded_port", guest: 5000, host: 5000, host_ip: "127.0.0.1"
-      alpha.vm.network "forwarded_port", guest: 5000, host: 6000, host_ip: "127.0.0.1"
+      alpha.vm.network "forwarded_port", guest: 5000, host: 5000, host_ip: "127.0.0.1"
       alpha.vm.network "private_network", ip: "192.168.33.10"
 
       # Windows users need to change the permissions explicitly so that Windows doesn't
