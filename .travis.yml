@@ -7,19 +7,15 @@ install: "pip install -r requirements.txt"
 
 # commands to run tests
 before_script: 
+  - export DB_USERNAME=travis 
+  - export DB_HOST=localhost
+  - export DB_PORT=3306
+  - export DB_DBNAME=development
   - mysql -e 'CREATE DATABASE development;'
   - python db_create.py
 
 script:
   - nosetests
-
-#after_success:
-#  - codecov
-env:
-  - DB_USERNAME=travis
-  - DB_HOST=localhost
-  - DB_PORT=3306
-  - DB_DBNAME=development
 
 services:
   - mysql
