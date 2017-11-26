@@ -12,5 +12,11 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 SQLALCHEMY_DATABASE_URI = get_database_uri()
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+DB_USERNAME = os.getenv('DB_USERNAME')
+DB_PASSWORD = os.getenv('DB_PASSWORD', '')
+DB_HOSTNAME = os.getenv('DB_HOST')
+DB_PORT = os.getenv('DB_PORT')
+DB_NAME = os.getenv('DB_DBNAME')
+
 SECRET_KEY = 'secret-for-dev-only'
 LOGGING_LEVEL = logging.INFO

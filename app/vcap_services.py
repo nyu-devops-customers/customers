@@ -43,11 +43,12 @@ def get_database_uri():
         name = creds["name"]
     else:
         logging.info("Using localhost database...")
-        username = 'root'
-        password = 'passw0rd'
-        hostname = 'localhost'
-        port = '3306'
-        name = 'development'
+
+        username = os.getenv('DB_USERNAME')
+        password = os.getenv('DB_PASSWORD', '')
+        hostname = os.getenv('DB_HOST')
+        port = os.getenv('DB_PORT')
+        name = os.getenv('DB_DBNAME')
 
     logging.info("Conecting to database on host %s port %s", hostname, port)
     connect_string = 'mysql+pymysql://{}:{}@{}:{}/{}'
