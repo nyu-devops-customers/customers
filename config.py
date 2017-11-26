@@ -4,14 +4,7 @@ import json
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-DB_USERNAME = ''
-DB_PASSWORD = ''
-DB_HOSTNAME = ''
-DB_PORT = ''
-DB_NAME = ''
-SQLALCHEMY_DATABASE_URI = ''
-
-def update_env_var():
+def get_sql_uri():
     """
     Initialized MySQL database connection
     This method will work in the following conditions:
@@ -42,10 +35,31 @@ def update_env_var():
 
     logging.info("Conecting to database on host %s port %s", DB_HOSTNAME, DB_PORT)
     connect_string = 'mysql+pymysql://{}:{}@{}:{}/{}'
-    SQLALCHEMY_DATABASE_URI = connect_string.format(DB_USERNAME, DB_PASSWORD, DB_HOSTNAME, DB_PORT, DB_NAME)
+    return connect_string.format(DB_USERNAME, DB_PASSWORD, DB_HOSTNAME, DB_PORT, DB_NAME)
 
-# update enviroment var form VCAP or directly local environment
-update_env_var()
+def get_db_info():
+    if 'VCAP_SERVICES' in os.environ:
+        vcap_services = os.environ['VCAP_SERVICES']
+        services = json.loads(vcap_services)
+        creds = services['cleardb'][0]['credentials']
+        #uri = creds["uri"]
+        username = creds["username"]
+        password = creds["password"]
+        hostname = creds["hostname"]
+        port = creds["port"]
+        name = creds["name"]
+    else:
+        username = os.getenv('DB_USERNAME')
+        password = os.getenv('DB_PASSWORD', '')
+        hostname = os.getenv('DB_HOST')
+        port = os.getenv('DB_PORT')
+        name = os.getenv('DB_DBNAME')
+
+    return username, password, hostname, port, name
+
+
+DB_USERNAME, DB_PASSWORD, DB_HOSTNAME, DB_PORT, DB_NAME = get_db_info()
+SQLALCHEMY_DATABASE_URI = get_sql_uri()
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SECRET_KEY = 'secret-for-dev-only'
