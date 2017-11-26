@@ -15,4 +15,4 @@ script:
 #  - codecov
 
 services:
-  - ClearDB
+  - mysql
