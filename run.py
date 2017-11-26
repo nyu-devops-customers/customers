@@ -19,4 +19,5 @@ if __name__ == "__main__":
     print " C U S T O M E R   S E R V I C E   R U N N I N G"
     print "****************************************"
     server.initialize_logging(logging.INFO)
+    server.init_db()
     app.run(host='0.0.0.0', port=int(PORT), debug=DEBUG)

@@ -3,15 +3,18 @@
 # coverage report -m
 
 """ Test cases for the Customer Service """
-
+import os
 import logging
 import unittest
 import json
 from mock import MagicMock, patch
 from flask_api import status    # HTTP Status Codes
+from app.models import Customer
 
+from app import server, db
 import app.server as server
 
+DATABASE_URI = os.getenv('DATABASE_URI', None)
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
@@ -22,18 +25,28 @@ class TestCustomerServer(unittest.TestCase):
     def setUpClass(cls):
         """ Run once before all tests """
         server.app.debug = False
-        server.initialize_logging(logging.ERROR)
+        server.initialize_logging(logging.INFO)
+        # Set up the test database
+        if DATABASE_URI:
+            server.app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
 
     def setUp(self):
-        """ Runs before each test """
-        server.Customer.remove_all()
-        server.Customer(0, 'fido', 'dog').save()
-        server.Customer(0, 'kitty', 'cat').save()
+        server.init_db()
+        db.drop_all()    # clean up the last tests
+        db.create_all()  # create new tables
+        server.Customer(firstname = 'fido', lastname = 'dog').save()
+        server.Customer(firstname = 'kitty', lastname = 'cat').save()
         self.app = server.app.test_client()
 
     def tearDown(self):
         """ Runs after each test """
-        server.Customer.remove_all()
+        db.session.remove()
+        db.drop_all()
 
     def test_index(self):
         """ Test the Home Page """
@@ -47,7 +60,7 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = json.loads(resp.data)
         self.assertEqual(len(data), 2)
-        server.Customer.remove_all()
+        Customer.remove_all()
         resp = self.app.get('/customers')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
