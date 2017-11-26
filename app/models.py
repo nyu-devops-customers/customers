@@ -38,11 +38,16 @@ import os
 import json
 import logging
 from . import db
+from . import app
 
 
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
     pass
+class DatabaseConnectionError(ConnectionError):
+    """ Used for database connection failure """
+    pass
+
 
 ######################################################################
 # Customer Model for database
@@ -120,7 +125,33 @@ class Customer(db.Model):
     def init_db():
         """ Initializes the database session """
         Customer.logger.info('Initializing database')
-        db.create_all()  # make our sqlalchemy tables
+        DATABASE_URI = os.getenv('DATABASE_URI', None)
+        if DATABASE_URI:
+            app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        Customer.logger.info('Database URI {}'.format(app.config['SQLALCHEMY_DATABASE_URI']))
+        try:
+            Customer.logger.info("Creating database tables")
+            db.create_all()
+        except Exception as error:
+            Customer.logger.error('Oops, got error {}'.format(error.message))
+            # Parse the URI for user, password, host
+            data = app.config['SQLALCHEMY_DATABASE_URI'].split('//')[1]
+            dbname = data.split('/')[1]
+            host = data.split('@')[1].split(':')[0]
+            creds = data.split('@')[0]
+            user = creds.split(':')[0]
+            password = creds.split(':')[1]
+            # Connect and create the database
+            try:
+                conn = pymysql.connect(host=host, user=user, password=password)
+                conn.cursor().execute('create database IF NOT EXISTS {}'.format(dbname))
+                Customer.logger.info("Creating database tables")
+                db.create_all()
+            except ConnectionError:
+                Customer.logger.error("Client Connection Error!")
+                raise DatabaseConnectionError('Could not connect to the clients MySQL Service')
+
+
 
     @staticmethod
     def all():

@@ -32,6 +32,7 @@ import logging
 from functools import wraps
 from flask import Flask, jsonify, request, url_for, make_response, abort
 from flask_api import status    # HTTP Status Codes
+from flask_restplus import Api, Resource, fields
 from werkzeug.exceptions import NotFound, UnsupportedMediaType, BadRequest
 from app.models import Customer, DataValidationError
 

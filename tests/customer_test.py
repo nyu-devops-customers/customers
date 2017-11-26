@@ -14,6 +14,7 @@ from app.models import DataValidationError
 # DATABASE_URI = 'mysql+pymysql://root:passw0rd@localhost:3306/test'
 DATABASE_URI = os.getenv('DATABASE_URI', None)
 
+import pdb; pdb.set_trace()
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
