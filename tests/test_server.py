@@ -50,6 +50,7 @@ class TestCustomerServer(unittest.TestCase):
 
     def test_index(self):
         """ Test the Home Page """
+        # import pdb; pdb.set_trace()
         resp = self.app.get('/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp.content_type, 'text/html; charset=utf-8')
@@ -198,13 +199,6 @@ class TestCustomerServer(unittest.TestCase):
          resp = self.app.post('/customers/0')
          self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    # @patch('server.Customer.find_by_firstname')
-    # def test_bad_request(self):
-        # """ Test a Bad Request error from Find By firstname """
-        # # bad_request_mock.side_effect = ValueError()
-        # resp = self.app.post('customers', content_type='application/json')
-        # self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
     @patch('app.server.Customer.find_by_firstname')
     def test_mock_search_data_internal_error(self, customer_find_mock):
         """ Mocking the Server Internal Error """
@@ -246,6 +240,7 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_the_valid_status_turn_by_credit(self):
+        """ Test the turn of valid when changing the credit_level """
         resp = self.app.put('/customers/2/upgrade-credit', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         new_json = json.loads(resp.data)
@@ -267,6 +262,12 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(new_json['credit_level'], 0)
         self.assertEqual(new_json['valid'], True)
 
+    def test_health_check(self):
+        """ Test the healthcheck url"""
+        resp = self.app.get('/healthcheck')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['message'], 'Healthy')
 ######################################################################
 # Utility functions
 ######################################################################
