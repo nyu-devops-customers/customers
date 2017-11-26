@@ -6,15 +6,16 @@ python:
 install: "pip install -r requirements.txt"
 
 # commands to run tests
-before_script: python db_create.py
+before_script: 
+  - export DB_USERNAME=travis 
+  - export DB_HOST=localhost
+  - export DB_PORT=3306
+  - export DB_DBNAME=development
+  - mysql -e 'CREATE DATABASE development;'
+  - python db_create.py
 
 script:
   - nosetests
-
-#after_success:
-#  - codecov
-env:
-  - DATABASE_URI="mysql+pymysql://root:@127.0.0.1:3306/"
 
 services:
   - mysql
