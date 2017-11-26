@@ -132,7 +132,8 @@ class Customer(db.Model):
     def remove_all():
         """ Removes all Customers from the database """
         Customer.logger.info('Removing all Customers')
-        db.session.expunge_all()
+        Customer.query.delete()
+        db.session.commit()
 
 
 ######################################################################

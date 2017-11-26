@@ -34,7 +34,7 @@ class TestCustomerServer(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         pass
-	
+
     def setUp(self):
         server.init_db()
         db.drop_all()    # clean up the last tests
@@ -60,10 +60,8 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = json.loads(resp.data)
         self.assertEqual(len(data), 2)
-        
-	db.session.remove()
-        db.drop_all()
-	resp = self.app.get('/customers')
+        Customer.remove_all()
+        resp = self.app.get('/customers')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_customer(self):

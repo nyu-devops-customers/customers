@@ -140,7 +140,7 @@ def query_customers():
         customers = Customer.find_by_firstname(first_name)
     else:
         raise BadRequest("should provide firstname or lastname")
-    if not customers:
+    if customers.count() == 0:
         raise NotFound("No Customers Found")
     results = [customer.serialize() for customer in customers]
     return make_response(jsonify(results), status.HTTP_200_OK)
