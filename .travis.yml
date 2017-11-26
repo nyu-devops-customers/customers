@@ -14,5 +14,5 @@ script:
 #after_success:
 #  - codecov
 
-#services:
-  #- redis-server
+services:
+  - ClearDB
