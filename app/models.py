@@ -106,7 +106,7 @@ class Customer(db.Model):
                 if self.credit_level >= 0 and self.valid == False:
                     raise DataValidationError('Invalid Customer: Customer with non-negative credit should be valid')
         except KeyError as error:
-            raise DataValidationError('Invalid Customer: missing ' + err.args[0])
+            raise DataValidationError('Invalid Customer: missing ' + error.args[0])
         except TypeError as error:
             raise DataValidationError('Invalid customer: body of request contained' \
                                       'bad or no data')
@@ -160,3 +160,4 @@ class Customer(db.Model):
     def find_by_firstname(firstname):
         """ Query that finds Customers by their firstname """
         Customer.logger.info('Processing name query for %s ...', firstname)
+        return Customer.query.filter(Customer.firstname == firstname)
