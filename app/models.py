@@ -39,12 +39,12 @@ import json
 import logging
 from . import db
 from . import app
-
+from sqlalchemy.exc import DisconnectionError
 
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
     pass
-class DatabaseConnectionError(ConnectionError):
+class DatabaseConnectionError(DisconnectionError):
     """ Used for database connection failure """
     pass
 
@@ -147,7 +147,7 @@ class Customer(db.Model):
                 conn.cursor().execute('create database IF NOT EXISTS {}'.format(dbname))
                 Customer.logger.info("Creating database tables")
                 db.create_all()
-            except ConnectionError:
+            except DisconnectionError:
                 Customer.logger.error("Client Connection Error!")
                 raise DatabaseConnectionError('Could not connect to the clients MySQL Service')
 
