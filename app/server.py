@@ -217,10 +217,6 @@ class CustomerCollection(Resource):
     def get(self):
         """ Returns a Query of the Customers """
         app.logger.info('Request to query Customers...')
-<<<<<<< HEAD
-=======
-        # set_trace()
->>>>>>> ebf762576c6c5d642b6de84dec73028585445965
         search_keywords = request.args.keys()
         for search_keyword in search_keywords:
             if search_keyword != 'lastname' and search_keyword != 'firstname':
@@ -237,10 +233,6 @@ class CustomerCollection(Resource):
             customers = Customer.find_by_firstname(first_name)
         else:
             customers = Customer.all()
-<<<<<<< HEAD
-=======
-        # set_trace()
->>>>>>> ebf762576c6c5d642b6de84dec73028585445965
         if not customers:
             raise NotFound("No Customers")
         results = [customer.serialize() for customer in customers]
