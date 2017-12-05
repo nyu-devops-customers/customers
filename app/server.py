@@ -86,7 +86,7 @@ def database_connection_error(error):
 ######################################################################
 # GET HOME PAGE
 ######################################################################
-@app.route('/')
+@app.route('/customers')
 def index():
     """ Return the home page"""
     # router could not find this function
@@ -100,11 +100,21 @@ def healthcheck():
     """ Let them know our heart is still beating """
     return make_response(jsonify(status=200, message='Healthy'), status.HTTP_200_OK)
 
+######################################################################
+# GET HEALTH CHECK
+######################################################################
+@app.route('/customers/reset', methods=['DELETE'])
+def customers_reset():
+    """ Removing all the customers from the database"""
+    Customer.remove_all()
+    return make_response(jsonify(status=200, message='Customer resetted.'), status.HTTP_200_OK)
+
+
 
 ######################################################################
 #  PATH: /customers/{id}
 ######################################################################
-@ns.route('/customers/<int:customer_id>')
+@ns.route('/<int:customer_id>')
 @ns.param('customer_id', 'The customer identifier')
 class CustomerResource(Resource):
     """
