@@ -32,7 +32,7 @@ import logging
 from functools import wraps
 from flask import jsonify, request, json, url_for, make_response, abort
 from flask_api import status    # HTTP Status Codes
-from flask_restplus import Api, Resource, fields
+from flask_restplus import Api as  BaseApi, Resource, fields
 from werkzeug.exceptions import NotFound
 from werkzeug.exceptions import NotFound, UnsupportedMediaType, BadRequest
 from app.models import Customer, DataValidationError, DatabaseConnectionError
@@ -40,6 +40,20 @@ from app.models import Customer, DataValidationError, DatabaseConnectionError
 from . import app
 
 from nose.tools import set_trace
+
+# Overwirte the original implementation to enable using the '/' as root
+# from github flask-restplus/issues/247
+class Api(BaseApi):
+    def _register_doc(self, app_or_blueprint):
+        # HINT: This is just a copy of the original implementation with the last line commented out.
+        if self._add_specs and self._doc:
+            # Register documentation before root if enabled
+            app_or_blueprint.add_url_rule(self._doc, 'doc', self.render_doc)
+        #app_or_blueprint.add_url_rule(self._doc, 'root', self.render_root)
+    @property
+    def base_path(self):
+        return ''
+
 ######################################################################
 # Configure Swagger before initilaizing it
 ######################################################################
@@ -87,7 +101,7 @@ def database_connection_error(error):
 ######################################################################
 # GET HOME PAGE
 ######################################################################
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
     """ Return the home page"""
     # router could not find this function
@@ -109,7 +123,6 @@ def customers_reset():
     """ Removing all the customers from the database"""
     Customer.remove_all()
     return make_response(jsonify(status=200, message='Customer resetted.'), status.HTTP_200_OK)
-
 
 
 ######################################################################

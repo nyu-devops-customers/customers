@@ -52,7 +52,7 @@ class TestCustomerServer(unittest.TestCase):
 
     def test_index(self):
         """ Test the Home Page """
-        # set_trace()
+        set_trace()
         resp = self.app.get('/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp.content_type, 'text/html; charset=utf-8')
