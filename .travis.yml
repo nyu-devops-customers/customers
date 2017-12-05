@@ -6,8 +6,8 @@ python:
 install: "pip install -r requirements.txt"
 
 # commands to run tests
-before_script: 
-  - export DB_USERNAME=travis 
+before_script:
+  - export DB_USERNAME=travis
   - export DB_HOST=localhost
   - export DB_PORT=3306
   - export DB_DBNAME=development

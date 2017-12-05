@@ -39,7 +39,7 @@ from app.models import Customer, DataValidationError, DatabaseConnectionError
 
 from . import app
 
-from nose.tools import set_trace
+# from nose.tools import set_trace
 
 # Overwirte the original implementation to enable using the '/' as root
 # from github flask-restplus/issues/247
@@ -217,7 +217,6 @@ class CustomerCollection(Resource):
     def get(self):
         """ Returns a Query of the Customers """
         app.logger.info('Request to query Customers...')
-        # set_trace()
         search_keywords = request.args.keys()
         for search_keyword in search_keywords:
             if search_keyword != 'lastname' and search_keyword != 'firstname':
@@ -234,7 +233,6 @@ class CustomerCollection(Resource):
             customers = Customer.find_by_firstname(first_name)
         else:
             customers = Customer.all()
-        # set_trace()
         if not customers:
             raise NotFound("No Customers")
         results = [customer.serialize() for customer in customers]

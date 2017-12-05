@@ -14,7 +14,7 @@ from app.models import Customer
 from app import server, db
 import app.server as server
 
-from nose.tools import set_trace
+# from nose.tools import set_trace
 
 DATABASE_URI = os.getenv('DATABASE_URI', None)
 ######################################################################
@@ -52,7 +52,6 @@ class TestCustomerServer(unittest.TestCase):
 
     def test_index(self):
         """ Test the Home Page """
-        set_trace()
         resp = self.app.get('/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp.content_type, 'text/html; charset=utf-8')
@@ -162,7 +161,6 @@ class TestCustomerServer(unittest.TestCase):
 
     def test_query_customer_list_by_lastname(self):
         """ Query Customers by Last Name """
-        # set_trace()
         resp = self.app.get('/customers?lastname=dog', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(len(resp.data) > 0)
@@ -174,7 +172,6 @@ class TestCustomerServer(unittest.TestCase):
 
     def test_query_customer_list_by_firstname(self):
         """ Query Customers by Fisrt Name """
-        # set_trace()
         resp = self.app.get('/customers?firstname=fido', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(len(resp.data) > 0)
