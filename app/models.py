@@ -186,10 +186,10 @@ class Customer(db.Model):
     def find_by_lastname(lastname):
         """ Query that finds Customers by their lastname """
         Customer.logger.info('Processing name query for %s ...', lastname)
-        return Customer.query.filter(Customer.lastname == lastname)
+        return Customer.query.filter(Customer.lastname == lastname).all()
 
     @staticmethod
     def find_by_firstname(firstname):
         """ Query that finds Customers by their firstname """
         Customer.logger.info('Processing name query for %s ...', firstname)
-        return Customer.query.filter(Customer.firstname == firstname)
+        return Customer.query.filter(Customer.firstname == firstname).all()
