@@ -39,6 +39,7 @@ from app.models import Customer, DataValidationError, DatabaseConnectionError
 
 from . import app
 
+from nose.tools import set_trace
 ######################################################################
 # Configure Swagger before initilaizing it
 ######################################################################
@@ -50,7 +51,7 @@ api = Api(app,
          )
 
 # This namespace is the start of the path i.e., /cutomers
-ns = api.namespace('/', description='Customer operations')
+ns = api.namespace('customers', description='Customer operations')
 
 # Define the model so that the docs reflect what can be sent
 Customer_model = api.model('Customer', {
@@ -86,7 +87,7 @@ def database_connection_error(error):
 ######################################################################
 # GET HOME PAGE
 ######################################################################
-@app.route('/customers')
+@app.route('/')
 def index():
     """ Return the home page"""
     # router could not find this function
@@ -101,7 +102,7 @@ def healthcheck():
     return make_response(jsonify(status=200, message='Healthy'), status.HTTP_200_OK)
 
 ######################################################################
-# GET HEALTH CHECK
+# CLEAR THE DATABASE
 ######################################################################
 @app.route('/customers/reset', methods=['DELETE'])
 def customers_reset():
@@ -191,19 +192,36 @@ class CustomerResource(Resource):
 ######################################################################
 #  PATH: /customers
 ######################################################################
-@ns.route('/customers', strict_slashes=False)
+@ns.route('/', strict_slashes=False)
 class CustomerCollection(Resource):
     """ Handles all interactions with collections of Customers """
     #------------------------------------------------------------------
-    # LIST ALL Customer
+    # Query Customers
     #------------------------------------------------------------------
-    @ns.doc('list_customers')
+    @ns.doc('query_customers')
     @ns.response(404, 'Customer not found')
     @ns.marshal_list_with(Customer_model)
     def get(self):
-        """ Returns all of the Customer """
-        app.logger.info('Request to list all the Customers...')
-        customers = Customer.all()
+        """ Returns a Query of the Customers """
+        app.logger.info('Request to query Customers...')
+        # set_trace()
+        search_keywords = request.args.keys()
+        for search_keyword in search_keywords:
+            if search_keyword != 'lastname' and search_keyword != 'firstname':
+                raise BadRequest('Can only use lastname or firstname to search.')
+        last_name = request.args.get('lastname')
+        first_name = request.args.get('firstname')
+        if last_name and first_name:
+             customers_match_lastname = Customer.find_by_lastname(last_name)
+             customers_match_firstname = Customer.find_by_firstname(first_name)
+             customers = list(set(customers_match_lastname) & set(customers_match_firstname))
+        elif last_name:
+            customers = Customer.find_by_lastname(last_name)
+        elif first_name:
+            customers = Customer.find_by_firstname(first_name)
+        else:
+            customers = Customer.all()
+        # set_trace()
         if not customers:
             raise NotFound("No Customers")
         results = [customer.serialize() for customer in customers]
@@ -237,7 +255,7 @@ class CustomerCollection(Resource):
 ######################################################################
 #  PATH: /customers/{id}/upgrade-credit
 ######################################################################
-@ns.route('/customers/<int:customer_id>/upgrade-credit')
+@ns.route('/<int:customer_id>/upgrade-credit')
 @ns.param('customer_id', 'The Customer identifier')
 class UpgradeCreditResource(Resource):
     """ Upgrade Credit Action on Customer """
@@ -263,7 +281,7 @@ class UpgradeCreditResource(Resource):
 ######################################################################
 #  PATH: /customers/{id}/downgrade-credit
 ######################################################################
-@ns.route('/customers/<int:customer_id>/downgrade-credit')
+@ns.route('/<int:customer_id>/downgrade-credit')
 @ns.param('customer_id', 'The Customer identifier')
 class DowngradeCreditResource(Resource):
     """ Downgrade Credit Action on Customer  """
@@ -285,32 +303,6 @@ class DowngradeCreditResource(Resource):
         app.logger.info('Credit level of customer with id [%s] has been downgraded!', customer.id)
         return customer.serialize(), status.HTTP_200_OK
 
-######################################################################
-#  PATH: /customer
-######################################################################
-@ns.route('/customer')
-@ns.param('lastname or firstname', 'The firstname or lastname of Customer')
-class CustomerQueryResource(Resource):
-    """ Query Action on Customers  """
-    @ns.doc('query_customer')
-    @ns.marshal_list_with(Customer_model)
-    @ns.response(404, 'Customer not found')
-    def get(self):
-        """ Query the customer by firstname or lastname """
-        app.logger.info('Request to query Customer...')
-        customers = []
-        last_name = request.args.get('lastname')
-        first_name = request.args.get('firstname')
-        if last_name:
-            customers = Customer.find_by_lastname(last_name)
-        elif first_name:
-            customers = Customer.find_by_firstname(first_name)
-        else:
-            raise BadRequest("should provide firstname or lastname")
-        if customers.count() == 0:
-            raise NotFound("No Customers Found")
-        results = [customer.serialize() for customer in customers]
-        return results, status.HTTP_200_OK
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
