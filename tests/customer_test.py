@@ -36,18 +36,15 @@ class TestCustomers(unittest.TestCase):
         db.create_all()  # make our sqlalchemy tables
 
     def tearDown(self):
-        db.session.remove()
-        db.drop_all()
+        db.session.close_all()
 
     def test_create_a_Customer(self):
         """ Create a Customer and assert that it exists """
-        # import pdb; pdb.set_trace()
         customer = Customer(firstname="fido", lastname="dog")
         self.assertTrue(customer != None)
         self.assertEqual(customer.id, None)
         self.assertEqual(customer.firstname, "fido")
         self.assertEqual(customer.lastname, "dog")
-        # import pdb; pdb.set_trace()
         customer.save()
         # the defalut values of the credit level and valid status should be set
         self.assertEqual(customer.credit_level, 0);
@@ -229,5 +226,3 @@ class TestCustomers(unittest.TestCase):
 ######################################################################
 if __name__ == '__main__':
     unittest.main()
-    # suite = unittest.TestLoader().loadTestsFromTestCase(TestCustomers)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
