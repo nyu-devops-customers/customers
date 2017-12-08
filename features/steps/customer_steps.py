@@ -23,7 +23,7 @@ def step_impl(context):
         data = {
             "firstname": row['firstname'],
             "lastname": row['lastname'],
-            "valid": row['available'] in ['True', 'true', '1']
+            "valid": row['valid'] in ['True', 'true', '1'],
             "credit_level": row['credit_level']
             }
         payload = json.dumps(data)
@@ -88,7 +88,7 @@ def step_impl(context, message):
 @then(u'I should see "{text_string}" in the "{table_id}" table')
 def step_impl(context, text_string, table_id):
     table = context.driver.find_element_by_id(table_id)
-    rows = result.find_elements_by_xpath(".//tr")
+    rows = table.find_elements_by_xpath(".//tr")
     for row in rows:
         text = row.text
         if text.find(text_string) > 0:
