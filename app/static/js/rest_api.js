@@ -166,6 +166,56 @@ $(function () {
     });
 
     // ****************************************
+    // Upgrade a Customer
+    // ****************************************
+
+    $("#upgrade-btn").click(function () {
+
+        var customer_id = $("#id_to_grade").val();
+
+        var ajax = $.ajax({
+            type: "PUT",
+            url: "/customers/" + customer_id + "/upgrade-credit",
+            contentType:"application/json",
+            data: '',
+        })
+
+        ajax.done(function(res){
+            show_result("#grade_panel","#grade_results",[res])
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message("Server error!")
+        });
+    });
+
+    // ****************************************
+    // Degrade a Customer
+    // ****************************************
+
+    $("#degrade-btn").click(function () {
+
+        var customer_id = $("#id_to_grade").val();
+
+        var ajax = $.ajax({
+            type: "PUT",
+            url: "/customers/" + customer_id + "/downgrade-credit",
+            contentType:"application/json",
+            data: '',
+        })
+
+        ajax.done(function(res){
+            show_result("#grade_panel","#grade_results",[res])
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message("Server error!")
+        });
+    });
+
+    // ****************************************
     // Search for a Customer
     // ****************************************
 
@@ -174,19 +224,19 @@ $(function () {
         var firstname = $("#first_name_to_search").val();
         var lastname = $("#last_name_to_search").val();
 
-        var queryString = ""
+        var queryString = []
 
         if (firstname) {
-            queryString += 'firstname=' + firstname
+            queryString.push('firstname=' + firstname)
         }
 
         if (lastname) {
-            queryString += 'lastname=' + lastname
+            queryString.push('lastname=' + lastname)
         }
 
         var ajax = $.ajax({
             type: "GET",
-            url: "/customers?" + queryString,
+            url: "/customers?" + queryString.join("&"),
             contentType:"application/json",
             data: ''
         })

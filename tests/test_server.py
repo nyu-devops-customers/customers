@@ -200,7 +200,7 @@ class TestCustomerServer(unittest.TestCase):
          resp = self.app.post('/customers/0')
          self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @patch('app.server.Customer.find_by_firstname')
+    @patch('app.server.Customer.find_by_kargs')
     def test_mock_search_data_internal_error(self, customer_find_mock):
         """ Mocking the Server Internal Error """
         customer_find_mock.side_effect = OSError()

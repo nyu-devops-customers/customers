@@ -217,22 +217,7 @@ class CustomerCollection(Resource):
     def get(self):
         """ Returns a Query of the Customers """
         app.logger.info('Request to query Customers...')
-        search_keywords = request.args.keys()
-        for search_keyword in search_keywords:
-            if search_keyword != 'lastname' and search_keyword != 'firstname':
-                raise BadRequest('Can only use lastname or firstname to search.')
-        last_name = request.args.get('lastname')
-        first_name = request.args.get('firstname')
-        if last_name and first_name:
-             customers_match_lastname = Customer.find_by_lastname(last_name)
-             customers_match_firstname = Customer.find_by_firstname(first_name)
-             customers = list(set(customers_match_lastname) & set(customers_match_firstname))
-        elif last_name:
-            customers = Customer.find_by_lastname(last_name)
-        elif first_name:
-            customers = Customer.find_by_firstname(first_name)
-        else:
-            customers = Customer.all()
+        customers = Customer.find_by_kargs(request.args.to_dict())
         if not customers:
             raise NotFound("No Customers")
         results = [customer.serialize() for customer in customers]

@@ -183,13 +183,16 @@ class Customer(db.Model):
         return Customer.query.get_or_404(customer_id)
 
     @staticmethod
-    def find_by_lastname(lastname):
+    def find_by_kargs(args):
         """ Query that finds Customers by their lastname """
-        Customer.logger.info('Processing name query for %s ...', lastname)
-        return Customer.query.filter(Customer.lastname == lastname).all()
+        Customer.logger.info('Processing name query for %s ...', str(args))
+        if len(args) == 0:
+            return Customer.all()
+        q = Customer.query
+        try:
+            for attr, value in args.items():
+                q = q.filter(getattr(Customer, attr) == value)
+            return q.all()
+        except AttributeError as error:
+            raise DataValidationError('Invalid Query String:' + str(args))
 
-    @staticmethod
-    def find_by_firstname(firstname):
-        """ Query that finds Customers by their firstname """
-        Customer.logger.info('Processing name query for %s ...', firstname)
-        return Customer.query.filter(Customer.firstname == firstname).all()
