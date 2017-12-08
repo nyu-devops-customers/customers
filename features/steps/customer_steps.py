@@ -5,7 +5,7 @@ Steps file for Customer.feature
 """
 
 from os import getenv
-import json
+import json, time
 import requests
 from behave import *
 from app import server
@@ -62,20 +62,24 @@ def step_impl(context, element_id, text_string):
 def step_impl(context, btn_id):
     btn = context.driver.find_element_by_id(btn_id)
     btn.click()
+    time.sleep(1)
 
 @then(u'I should see "{name}" in the results')
 def step_impl(context, name):
     element = context.driver.find_element_by_id('search_results')
+    print(element.text)
     assert name in element.text
 
 @then(u'I should not see "{name}" in the results')
 def step_impl(context, name):
     element = context.driver.find_element_by_id('search_results')
+    print(element.text)
     assert name not in element.text
 
 @then(u'I should see the message "{message}"')
 def step_impl(context, message):
     element = context.driver.find_element_by_id('flash_message')
+    print(element.text)
     assert message in element.text
 
 ##################################################################
@@ -91,6 +95,7 @@ def step_impl(context, text_string, table_id):
     rows = table.find_elements_by_xpath(".//tr")
     for row in rows:
         text = row.text
+        print(text)
         if text.find(text_string) > 0:
             return
     assert 0
