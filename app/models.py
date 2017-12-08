@@ -125,13 +125,12 @@ class Customer(db.Model):
     def init_db(reset = False):
         """ Initializes the database session """
         Customer.logger.info('Initializing database')
-        DATABASE_URI = os.getenv('DATABASE_URI', None)
-        if DATABASE_URI:
-            app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
-        Customer.logger.info('Database URI {}'.format(app.config['SQLALCHEMY_DATABASE_URI']))
+        uri = app.config['SQLALCHEMY_DATABASE_URI']
+        Customer.logger.info('Database URI {}'.format(uri))
         try:
             Customer.logger.info("Creating database tables")
             if reset:
+                Customer.logger.info('Dropping old tables')
                 db.drop_all()
             db.create_all()
         except Exception as error:

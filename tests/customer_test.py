@@ -31,7 +31,6 @@ class TestCustomers(unittest.TestCase):
         pass
 
     def setUp(self):
-        #Pet.init_db()
         db.drop_all()    # clean up the last tests
         db.create_all()  # make our sqlalchemy tables
 
@@ -73,7 +72,7 @@ class TestCustomers(unittest.TestCase):
         """ Upgrade credit of a Customer """
         #customer = Customer(0, "fido", "dog")
         customer  = Customer(firstname="fido", lastname="dog")
-	customer.save()
+        customer.save()
         self.assertEqual(customer.id, 1)
         self.assertEqual(customer.valid, True)
         # Upgrade it and save it
@@ -194,6 +193,9 @@ class TestCustomers(unittest.TestCase):
 
     def test_find_Customer(self):
         """ Find a Customer by ID """
+        customer = Customer.all()
+        self.assertEqual(customer, [])
+
         Customer(firstname = "fido", lastname = "dog").save()
         Customer(firstname = "kitty",lastname = "cat").save()
         customer = Customer.find(2)

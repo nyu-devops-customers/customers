@@ -305,9 +305,9 @@ class DowngradeCreditResource(Resource):
 ######################################################################
 
 @app.before_first_request
-def init_db():
+def init_db(reset=False):
     """ Initialies the SQLAlchemy app """
-    Customer.init_db()
+    Customer.init_db(reset)
 
 def data_reset():
     """ Removes all Customers from the database """

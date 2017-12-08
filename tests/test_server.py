@@ -38,17 +38,14 @@ class TestCustomerServer(unittest.TestCase):
         pass
 
     def setUp(self):
-        server.init_db()
-        db.drop_all()    # clean up the last tests
-        db.create_all()  # create new tables
+        server.init_db(reset=True)
         server.Customer(firstname = 'fido', lastname = 'dog').save()
         server.Customer(firstname = 'kitty', lastname = 'cat').save()
         self.app = server.app.test_client()
 
     def tearDown(self):
         """ Runs after each test """
-        db.session.remove()
-        db.drop_all()
+        db.session.close_all()
 
     def test_index(self):
         """ Test the Home Page """
