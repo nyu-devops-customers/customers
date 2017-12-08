@@ -17,7 +17,7 @@ def get_sql_uri():
         logging.info("Using VCAP_SERVICES...")
         vcap_services = os.environ['VCAP_SERVICES']
         services = json.loads(vcap_services)
-        creds = services['cleardb'][0]['credentials']
+        creds = services['elephantsql'][0]['credentials']
         #uri = creds["uri"]
         DB_USERNAME = creds["username"]
         DB_PASSWORD = creds["password"]
