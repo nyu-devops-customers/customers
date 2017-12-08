@@ -41,7 +41,7 @@ def get_db_info():
     if 'VCAP_SERVICES' in os.environ:
         vcap_services = os.environ['VCAP_SERVICES']
         services = json.loads(vcap_services)
-        creds = services['cleardb'][0]['credentials']
+        creds = services['elephantsql'][0]['credentials']
         #uri = creds["uri"]
         username = creds["username"]
         password = creds["password"]
