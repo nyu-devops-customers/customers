@@ -49,11 +49,11 @@ $(function () {
     $("#create-btn").click(function () {
 
         var first_name = $("#first_name_to_create").val();
-        var category = $("#first_name_to_create").val();
+        var last_name = $("#last_name_to_create").val();
 
         var data = {
             "firstname": first_name,
-            "lastname": category,
+            "lastname": last_name,
         };
 
         var ajax = $.ajax({
