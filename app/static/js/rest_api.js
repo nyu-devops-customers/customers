@@ -27,13 +27,17 @@ $(function () {
       $(panel_id).show();
       $(table_id).append('<table class="table-striped">');
       var header = '<tr>'
-      header += '<th style="width:30%">ID</th>'
-      header += '<th style="width:60%">First Name</th>'
-      header += '<th style="width:60%">Last name</th>'
+      header += '<th style="width:25%">ID</th>'
+      header += '<th style="width:25%">First Name</th>'
+      header += '<th style="width:25%">Last Name</th>'
+      header += '<th style="width:25%">Credit Level</th>'
+      header += '<th style="width:20%">Valid</th>'
       $(table_id).append(header);
       for(var i = 0; i < res.length; i++) {
           customer = res[i];
-          var row = "<tr><td>"+customer.id+"</td><td>"+customer.firstname+"</td><td>"+customer.lastname+"</td><tr>";
+          var row = "<tr><td>"+customer.id+"</td><td>"+
+                customer.firstname+"</td><td>"+customer.lastname+"</td><td>"+
+                customer.credit_level+"</td><td>"+customer.valid+"</td><tr>";
           $(table_id).append(row);
       }
 
