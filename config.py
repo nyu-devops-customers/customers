@@ -27,7 +27,7 @@ def get_db_info():
         # name = creds["name"]
 
         # PostSQL
-        full_uri = services['elephantsql'][0]['credentials']
+        full_uri = services['elephantsql'][0]['credentials']['uri']
         uri = full_uri.split('/')[-2]
         name = full_uri.split('/')[-1]
         hostname = uri.split('@')[1].split(':')[0]
