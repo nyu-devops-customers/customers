@@ -26,250 +26,317 @@ PUT /customers/{id}/upgrade-credit - updates a Customer credit_level record in t
 PUT /customers/{id}/downgrade-credit - updates a Customer credit_level record in the database
 """
 
-import os, re
-import sys
+import os, sys
+import re
 import logging
 from functools import wraps
-from flask import Flask, jsonify, request, url_for, make_response, abort
+from flask import jsonify, request, json, url_for, make_response, abort
 from flask_api import status    # HTTP Status Codes
-from flask_restplus import Api, Resource, fields
+from flask_restplus import Api as  BaseApi, Resource, fields
+from werkzeug.exceptions import NotFound
 from werkzeug.exceptions import NotFound, UnsupportedMediaType, BadRequest
-from app.models import Customer, DataValidationError
+from app.models import Customer, DataValidationError, DatabaseConnectionError
 
 from . import app
 
+# from nose.tools import set_trace
+
+# Overwirte the original implementation to enable using the '/' as root
+# from github flask-restplus/issues/247
+class Api(BaseApi):
+    def _register_doc(self, app_or_blueprint):
+        # HINT: This is just a copy of the original implementation with the last line commented out.
+        if self._add_specs and self._doc:
+            # Register documentation before root if enabled
+            app_or_blueprint.add_url_rule(self._doc, 'doc', self.render_doc)
+        #app_or_blueprint.add_url_rule(self._doc, 'root', self.render_root)
+    @property
+    def base_path(self):
+        return ''
 
 ######################################################################
-# Error Handlers
+# Configure Swagger before initilaizing it
 ######################################################################
-@app.errorhandler(DataValidationError)
+api = Api(app,
+          version='1.0.0',
+          title='Customer REST API Service of the NYU DevOps team alpha',
+          description='This is a customer store server.',
+          doc='/doc'
+         )
+
+# This namespace is the start of the path i.e., /cutomers
+ns = api.namespace('customers', description='Customer operations')
+
+# Define the model so that the docs reflect what can be sent
+Customer_model = api.model('Customer', {
+    'id': fields.Integer(readOnly=True,
+                         description='The unique id assigned internally by service'),
+    'firstname': fields.String(required=True,
+                          description='The firstname of the Customers'),
+    'lastname': fields.String(required=True,
+                              description='The lastname of Customer fish'),
+    'valid': fields.Boolean(required=True,
+                              description='The valid status of the Customer'),
+    'credit_level': fields.Integer(required=True,
+                              description='The credit level of the Customer valid'    )
+})
+
+######################################################################
+# Special Error Handlers
+######################################################################
+@api.errorhandler(DataValidationError)
 def request_validation_error(error):
     """ Handles Value Errors from bad data """
-    return bad_request(error)
-
-@app.errorhandler(400)
-def bad_request(error):
-    """ Handles bad reuests with 400_BAD_REQUEST """
     message = error.message or str(error)
     app.logger.info(message)
-    return jsonify(status=400, error='Bad Request', message=message), 400
+    return {'status':400, 'error': 'Bad Request', 'message': message}, 400
 
-@app.errorhandler(404)
-def not_found(error):
-    """ Handles resources not found with 404_NOT_FOUND """
+@api.errorhandler(DatabaseConnectionError)
+def database_connection_error(error):
+    """ Handles Database Errors from connection attempts """
     message = error.message or str(error)
-    app.logger.info(message)
-    return jsonify(status=404, error='Not Found', message=message), 404
-
-@app.errorhandler(405)
-def method_not_supported(error):
-    """ Handles unsuppoted HTTP methods with 405_METHOD_NOT_SUPPORTED """
-    message = error.message or str(error)
-    app.logger.info(message)
-    return jsonify(status=405, error='Method not Allowed', message=message), 405
-
-@app.errorhandler(415)
-def mediatype_not_supported(error):
-	""" Handles unsuppoted media requests with 415_UNSUPPORTED_MEDIA_TYPE """
-	message = error.message or str(error)
-	app.logger.info(message)
-	return jsonify(status=415, error='Unsupported media type', message=message), 415
-
-@app.errorhandler(500)
-def internal_server_error(error):
-    """ Handles unexpected server error with 500_SERVER_ERROR """
-    message = error.message or str(error)
-    app.logger.info(message)
-    return jsonify(status=500, error='Internal Server Error', message=message), 500
-
-# check content type
-def check_content_type(content_type):
-    def decorater(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            """ Checks that the media type is correct """
-            pattern = re.compile(content_type+'.*')
-            if 'Content-Type' in request.headers:
-                if pattern.match(request.headers['Content-Type']):
-                    return f(*args, **kwargs)
-                else:
-                    app.logger.error('Invalid Content-Type: %s', request.headers['Content-Type'])
-                    raise UnsupportedMediaType(' Content-Type must be {}'.format(content_type))
-            else:
-                # provide no content type
-                app.logger.error('Provide No Content-Type')
-                raise UnsupportedMediaType(' Content-Type must be {}'.format(content_type))
-        return decorated_function
-    return decorater
-
+    app.logger.critical(message)
+    return {'status':500, 'error': 'Server Error', 'message': message}, 500
 
 ######################################################################
-# GET INDEX
+# GET HOME PAGE
 ######################################################################
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
-    """ Root URL response """
+    """ Return the home page"""
+    # router could not find this function
     return app.send_static_file('index.html')
 
+######################################################################
+# GET HEALTH CHECK
+######################################################################
+@app.route('/healthcheck')
+def healthcheck():
+    """ Let them know our heart is still beating """
+    return make_response(jsonify(status=200, message='Healthy'), status.HTTP_200_OK)
 
 ######################################################################
-# LIST ALL CUSTOMERS
+# CLEAR THE DATABASE
 ######################################################################
-@app.route('/customers', methods=['GET'])
-def list_customers():
-    """ Returns all of the Customers """
-    customers = Customer.all()
-    if not customers:
-        raise NotFound("No Customers")
-    results = [customer.serialize() for customer in customers]
-    return make_response(jsonify(results), status.HTTP_200_OK)
-
-
-######################################################################
-# QUERY CUSTOMERS
-######################################################################
-@app.route('/customer', methods=['GET'])
-@check_content_type('application/json')
-def query_customers():
-    """ Query parts of the Customers """
-    customers = []
-    last_name = request.args.get('lastname')
-    first_name = request.args.get('firstname')
-    if last_name:
-        customers = Customer.find_by_lastname(last_name)
-    elif first_name:
-        customers = Customer.find_by_firstname(first_name)
-    else:
-        raise BadRequest("should provide firstname or lastname")
-    if customers.count() == 0:
-        raise NotFound("No Customers Found")
-    results = [customer.serialize() for customer in customers]
-    return make_response(jsonify(results), status.HTTP_200_OK)
+@app.route('/customers/reset', methods=['DELETE'])
+def customers_reset():
+    """ Removing all the customers from the database"""
+    Customer.remove_all()
+    return make_response(jsonify(status=200, message='Customer resetted.'), status.HTTP_200_OK)
 
 
 ######################################################################
-# RETRIEVE A CUSTOMER
+#  PATH: /customers/{id}
 ######################################################################
-@app.route('/customers/<int:customer_id>', methods=['GET'])
-def get_customers(customer_id):
+@ns.route('/<int:customer_id>')
+@ns.param('customer_id', 'The customer identifier')
+class CustomerResource(Resource):
     """
-    Retrieve a single Customer
-
-    This endpoint will return a Customer based on it's id
+    CustomerResource class
+    Allows the manipulation of a single Customer
+    GET /Customer{id} - Returns a Customer with the id
+    PUT /Customer{id} - Update a Customer with the id
+    DELETE /Customer{id} -  Deletes a Customer with the id
     """
-    customer = Customer.find(customer_id)
-    if not customer:
-        raise NotFound("Customer with id '{}' was not found.".format(customer_id))
-    return make_response(jsonify(customer.serialize()), status.HTTP_200_OK)
+    #------------------------------------------------------------------
+    # RETRIEVE A Customer
+    #------------------------------------------------------------------
+    @ns.doc('get_customers')
+    @ns.response(404, 'Customer not found')
+    @ns.marshal_with(Customer_model)
+    def get(self, customer_id):
+        """
+        Retrieve a single Customer
+
+        This endpoint will return a Customer based on it's id
+        """
+        app.logger.info("Request to Retrieve a Customer with id [%s]", customer_id)
+        customer = Customer.find(customer_id)
+        if not customer:
+            raise NotFound("Customer with id '{}' was not found.".format(customer_id))
+        return customer.serialize(), status.HTTP_200_OK
+
+    #------------------------------------------------------------------
+    # UPDATE AN EXISTING Customer
+    #------------------------------------------------------------------
+    @ns.doc('update_customer')
+    @ns.response(404, 'Customer not found')
+    @ns.response(400, 'The posted Customer data was not valid')
+    @ns.expect(Customer_model)
+    @ns.marshal_with(Customer_model)
+    def put(self, customer_id):
+        """
+        Update a Customer
+
+        This endpoint will update a Customer based the body that is posted
+        """
+        app.logger.info('Request to Update a customer with id [%s]', customer_id)
+        check_content_type('application/json')
+        customer = Customer.find(customer_id)
+        if not customer:
+            raise NotFound("Customer with id '{}' was not found.".format(customer_id))
+        data = api.payload
+        app.logger.info(data)
+        # rewrite this function in the future
+        # might be buggy
+        customer.deserialize(data)
+        customer.id = customer_id
+        customer.save()
+        return customer.serialize(), status.HTTP_200_OK
+
+    #------------------------------------------------------------------
+    # DELETE A Customer
+    #------------------------------------------------------------------
+    @ns.doc('delete_customers')
+    @ns.response(204, 'Customer deleted')
+    def delete(self, customer_id):
+        """
+        Delete a Customer
+
+        This endpoint will delete a Customer based the id specified in the path
+        """
+        app.logger.info('Request to Delete a Customer with id [%s]', customer_id)
+        customer = Customer.find(customer_id)
+        if customer:
+            customer.delete()
+        return '', status.HTTP_204_NO_CONTENT
 
 
 ######################################################################
-# ADD A NEW CUSTOMER
+#  PATH: /customers
 ######################################################################
-@app.route('/customers', methods=['POST'])
-@check_content_type('application/json')
-def create_customers():
-    """
-    Add a Customer
-    This endpoint will create a Customer based the data in the body that is posted
-    """
-    customer = Customer()
-    customer.deserialize(request.get_json())
-    customer.save()
-    message = customer.serialize()
-    location_url = url_for('get_customers', customer_id=customer.id, _external=True)
-    return make_response(jsonify(message), status.HTTP_201_CREATED,
-                         {
-                             'Location': location_url
-                         })
+@ns.route('/', strict_slashes=False)
+class CustomerCollection(Resource):
+    """ Handles all interactions with collections of Customers """
+    #------------------------------------------------------------------
+    # Query Customers
+    #------------------------------------------------------------------
+    @ns.doc('query_customers')
+    @ns.response(404, 'Customer not found')
+    @ns.marshal_list_with(Customer_model)
+    def get(self):
+        """ Returns a Query of the Customers """
+        app.logger.info('Request to query Customers...')
+        search_keywords = request.args.keys()
+        for search_keyword in search_keywords:
+            if search_keyword != 'lastname' and search_keyword != 'firstname':
+                raise BadRequest('Can only use lastname or firstname to search.')
+        last_name = request.args.get('lastname')
+        first_name = request.args.get('firstname')
+        if last_name and first_name:
+             customers_match_lastname = Customer.find_by_lastname(last_name)
+             customers_match_firstname = Customer.find_by_firstname(first_name)
+             customers = list(set(customers_match_lastname) & set(customers_match_firstname))
+        elif last_name:
+            customers = Customer.find_by_lastname(last_name)
+        elif first_name:
+            customers = Customer.find_by_firstname(first_name)
+        else:
+            customers = Customer.all()
+        if not customers:
+            raise NotFound("No Customers")
+        results = [customer.serialize() for customer in customers]
+        app.logger.info('[%s] Customer returned', len(results))
+        return results, status.HTTP_200_OK
 
-
-######################################################################
-# UPDATE AN EXISTING CUSTOMER
-######################################################################
-@app.route('/customers/<int:customer_id>', methods=['PUT'])
-@check_content_type('application/json')
-def update_customers(customer_id):
-    """
-    Update a Customer
-
-    This endpoint will update a Customer based the body that is posted
-    """
-    customer = Customer.find(customer_id)
-    if not customer:
-        raise NotFound("Customer with id '{}' was not found.".format(customer_id))
-    customer.deserialize(request.get_json())
-    customer.id = customer_id
-    customer.save()
-    return make_response(jsonify(customer.serialize()), status.HTTP_200_OK)
-
-
-######################################################################
-# UPGRAGE CREDIT LEVEL OF A CUSTOMER
-######################################################################
-@app.route('/customers/<int:customer_id>/upgrade-credit', methods=['PUT'])
-@check_content_type('application/json')
-def upgrade_customers_credit(customer_id):
-    """
-    Increse the credit of a customer
-
-    If the credit of the customer becomes more then zero the customer will be defreezed
-    """
-    customer = Customer.find(customer_id)
-    if not customer:
-        raise NotFound("Customer with id '{}' was not found.".format(customer_id))
-    customer.upgrade_credit_level()
-    customer.id = customer_id
-    customer.save()
-    return make_response(jsonify(customer.serialize()), status.HTTP_200_OK)
-
-
-######################################################################
-# DOWNGRAGE CREDIT LEVEL OF A CUSTOMER
-######################################################################
-@app.route('/customers/<int:customer_id>/downgrade-credit', methods=['PUT'])
-@check_content_type('application/json')
-def downgrade_customers_credit(customer_id):
-    """
-    Decrese the credit of a customer
-
-    If the credit of the customer becomes less then zero the customer will be freezed
-    """
-    customer = Customer.find(customer_id)
-    if not customer:
-        raise NotFound("Customer with id '{}' was not found.".format(customer_id))
-    customer.downgrade_credit_level()
-    customer.id = customer_id
-    customer.save()
-    return make_response(jsonify(customer.serialize()), status.HTTP_200_OK)
+    #------------------------------------------------------------------
+    # ADD A NEW Customer
+    #------------------------------------------------------------------
+    @ns.doc('create_customers')
+    @ns.expect(Customer_model)
+    @ns.response(400, 'The posted data was not valid')
+    @ns.response(201, 'Customer created successfully')
+    @ns.marshal_with(Customer_model, code=201)
+    def post(self):
+        """
+        Creates a Customer
+        This endpoint will create a Customer based the data in the body that is posted
+        """
+        app.logger.info('Request to Create a customer')
+        check_content_type('application/json')
+        customer = Customer()
+        app.logger.info('Payload = %s', api.payload)
+        customer.deserialize(api.payload)
+        customer.save()
+        app.logger.info('Customer with new id [%s] saved!', customer.id)
+        location_url = api.url_for(CustomerResource, customer_id=customer.id, _external=True)
+        return customer.serialize(), status.HTTP_201_CREATED, {'Location': location_url}
 
 
 ######################################################################
-# DELETE A CUSTOMER
+#  PATH: /customers/{id}/upgrade-credit
 ######################################################################
-@app.route('/customers/<int:customer_id>', methods=['DELETE'])
-@check_content_type('application/json')
-def delete_customers(customer_id):
-    """
-    Delete a Customer
+@ns.route('/<int:customer_id>/upgrade-credit')
+@ns.param('customer_id', 'The Customer identifier')
+class UpgradeCreditResource(Resource):
+    """ Upgrade Credit Action on Customer """
+    @ns.doc('upgrade-credit')
+    @ns.response(404, 'Customer not found')
+    def put(self, customer_id):
+        """
+        Upgrade credit level of a customers
 
-    This endpoint will delete a Customer based the id specified in the path
-    """
-    customer = Customer.find(customer_id)
-    if customer:
-        customer.delete()
-    return make_response('', status.HTTP_204_NO_CONTENT)
+        This endpoint will increment the credit level of a customer.
+        And if credit level becomes positive the valid status of the customer will be True.
+        """
+        app.logger.info('Request to upgrade credit_level of a customer')
+        customer = Customer.find(customer_id)
+        if not customer:
+            abort(status.HTTP_404_NOT_FOUND, 'Customer with id [{}] was not found.'.format(customer_id))
+        customer.upgrade_credit_level()
+        customer.save()
+        app.logger.info('Credit level of customer with id [%s] has been upgraded!', customer.id)
+        return customer.serialize(), status.HTTP_200_OK
+
+
+######################################################################
+#  PATH: /customers/{id}/downgrade-credit
+######################################################################
+@ns.route('/<int:customer_id>/downgrade-credit')
+@ns.param('customer_id', 'The Customer identifier')
+class DowngradeCreditResource(Resource):
+    """ Downgrade Credit Action on Customer  """
+    @ns.doc('downgrade-credit')
+    @ns.response(404, 'Customer not found')
+    def put(self, customer_id):
+        """
+        Downgrade credit level of a customers
+
+        This endpoint will decrease the credit level of a customer.
+        And if credit level becomes negative the valid status of the customer will be False.
+        """
+        app.logger.info('Request to uowngrade credit_level of a customer')
+        customer = Customer.find(customer_id)
+        if not customer:
+            abort(status.HTTP_404_NOT_FOUND, 'Customer with id [{}] was not found.'.format(customer_id))
+        customer.downgrade_credit_level()
+        customer.save()
+        app.logger.info('Credit level of customer with id [%s] has been downgraded!', customer.id)
+        return customer.serialize(), status.HTTP_200_OK
 
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
+
+@app.before_first_request
 def init_db():
     """ Initialies the SQLAlchemy app """
     Customer.init_db()
 
+def data_reset():
+    """ Removes all Customers from the database """
+    Customers.remove_all()
+
+def check_content_type(content_type):
+    """ Checks that the media type is correct """
+    if request.headers['Content-Type'] == content_type:
+        return
+    app.logger.error('Invalid Content-Type: %s', request.headers['Content-Type'])
+    abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, 'Content-Type must be {}'.format(content_type))
+
 #@app.before_first_request
-def initialize_logging(log_level):
+def initialize_logging(log_level=logging.INFO):
     """ Initialized the default logging to STDOUT """
     if not app.debug:
         print 'Setting up logging...'

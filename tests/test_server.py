@@ -14,6 +14,8 @@ from app.models import Customer
 from app import server, db
 import app.server as server
 
+# from nose.tools import set_trace
+
 DATABASE_URI = os.getenv('DATABASE_URI', None)
 ######################################################################
 #  T E S T   C A S E S
@@ -159,7 +161,7 @@ class TestCustomerServer(unittest.TestCase):
 
     def test_query_customer_list_by_lastname(self):
         """ Query Customers by Last Name """
-        resp = self.app.get('/customer?lastname=dog', content_type='application/json')
+        resp = self.app.get('/customers?lastname=dog', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(len(resp.data) > 0)
         self.assertTrue('fido' in resp.data)
@@ -170,7 +172,7 @@ class TestCustomerServer(unittest.TestCase):
 
     def test_query_customer_list_by_firstname(self):
         """ Query Customers by Fisrt Name """
-        resp = self.app.get('/customer?firstname=fido', content_type='application/json')
+        resp = self.app.get('/customers?firstname=fido', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(len(resp.data) > 0)
         self.assertTrue('fido' in resp.data)
@@ -184,13 +186,13 @@ class TestCustomerServer(unittest.TestCase):
 
     def test_query_customer_list_by_unsupported_field(self):
         """ Query Customers by None Parameter"""
-        resp = self.app.get('/customer?gender=male', content_type='application/json')
+        resp = self.app.get('/customers?gender=male', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_query_no_customer(self):
         """ Query used when no custome is avaliable """
         server.Customer.remove_all()
-        resp = self.app.get('/customer?lastname=dog', content_type='application/json')
+        resp = self.app.get('/customers?lastname=dog', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_method_not_allowed(self):
@@ -198,18 +200,11 @@ class TestCustomerServer(unittest.TestCase):
          resp = self.app.post('/customers/0')
          self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    # @patch('server.Customer.find_by_firstname')
-    # def test_bad_request(self):
-        # """ Test a Bad Request error from Find By firstname """
-        # # bad_request_mock.side_effect = ValueError()
-        # resp = self.app.post('customers', content_type='application/json')
-        # self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
     @patch('app.server.Customer.find_by_firstname')
     def test_mock_search_data_internal_error(self, customer_find_mock):
         """ Mocking the Server Internal Error """
         customer_find_mock.side_effect = OSError()
-        resp = self.app.get('/customer?firstname=fido', content_type='application/json')
+        resp = self.app.get('/customers?firstname=fido', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_415_unsupported_media_type(self):
@@ -246,6 +241,7 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_the_valid_status_turn_by_credit(self):
+        """ Test the turn of valid when changing the credit_level """
         resp = self.app.put('/customers/2/upgrade-credit', content_type='application/json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         new_json = json.loads(resp.data)
@@ -267,6 +263,12 @@ class TestCustomerServer(unittest.TestCase):
         self.assertEqual(new_json['credit_level'], 0)
         self.assertEqual(new_json['valid'], True)
 
+    def test_health_check(self):
+        """ Test the healthcheck url"""
+        resp = self.app.get('/healthcheck')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_json = json.loads(resp.data)
+        self.assertEqual(new_json['message'], 'Healthy')
 ######################################################################
 # Utility functions
 ######################################################################
