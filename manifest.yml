@@ -10,5 +10,5 @@ applications:
   path: .
   disk_quota: 512M
   buildpack: python_buildpack
-  services:
-  - MySQL_ClearDB
+  #services:
+  #- MySQL_ClearDB
