@@ -224,19 +224,19 @@ $(function () {
         var firstname = $("#first_name_to_search").val();
         var lastname = $("#last_name_to_search").val();
 
-        var queryString = ""
+        var queryString = []
 
         if (firstname) {
-            queryString += 'firstname=' + firstname
+            queryString.push('firstname=' + firstname)
         }
 
         if (lastname) {
-            queryString += 'lastname=' + lastname
+            queryString.push('lastname=' + lastname)
         }
 
         var ajax = $.ajax({
             type: "GET",
-            url: "/customers?" + queryString,
+            url: "/customers?" + queryString.join("&"),
             contentType:"application/json",
             data: ''
         })
