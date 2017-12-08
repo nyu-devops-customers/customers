@@ -135,12 +135,10 @@ class Customer(db.Model):
         except Exception as error:
             Customer.logger.error('Oops, got error {}'.format(error.message))
             # Parse the URI for user, password, host
-            data = app.config['SQLALCHEMY_DATABASE_URI'].split('//')[1]
-            dbname = data.split('/')[1]
-            host = data.split('@')[1].split(':')[0]
-            creds = data.split('@')[0]
-            user = creds.split(':')[0]
-            password = creds.split(':')[1]
+            dbname = app.config['DB_NAME']
+            host = app.config['DB_HOSTNAME']
+            user = app.config['DB_USERNAME']
+            password = app.config['DB_PASSWORD']
             # Connect and create the database
             try:
                 conn = pymysql.connect(host=host, user=user, password=password)

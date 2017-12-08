@@ -52,10 +52,7 @@ export DB_HOST=localhost
 export DB_PORT=3306
 export DB_DBNAME=development
 EOF
-  
   source ~/.profile
-  cd /vagrant
-  python db_create.py
 
   # Install PhantomJS for Selenium browser support
   echo "\n***********************************"
