@@ -16,8 +16,8 @@ BASE_URL = getenv('BASE_URL', 'http://localhost:5000/')
 def step_impl(context):
     """ Delete all customers and load new ones """
     headers = {'Content-Type': 'application/json'}
-    # context.resp = requests.delete(context.base_url + '/pets/reset', headers=headers)
-    # assert context.resp.status_code == 204
+    context.resp = requests.delete(context.base_url + '/customers/reset', headers=headers)
+    assert context.resp.status_code == 204
     create_url = context.base_url + '/customers'
     for row in context.table:
         data = {

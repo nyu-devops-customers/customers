@@ -121,8 +121,8 @@ def healthcheck():
 @app.route('/customers/reset', methods=['DELETE'])
 def customers_reset():
     """ Removing all the customers from the database"""
-    Customer.remove_all()
-    return make_response(jsonify(status=200, message='Customer resetted.'), status.HTTP_200_OK)
+    Customer.init_db(reset = True)
+    return make_response(jsonify(status=204, message='Customer resetted.'), status.HTTP_204_NO_CONTENT)
 
 
 ######################################################################

@@ -122,7 +122,7 @@ class Customer(db.Model):
 #  S T A T I C   D A T A B S E   M E T H O D S
 ######################################################################
     @staticmethod
-    def init_db():
+    def init_db(reset = False):
         """ Initializes the database session """
         Customer.logger.info('Initializing database')
         DATABASE_URI = os.getenv('DATABASE_URI', None)
@@ -131,6 +131,8 @@ class Customer(db.Model):
         Customer.logger.info('Database URI {}'.format(app.config['SQLALCHEMY_DATABASE_URI']))
         try:
             Customer.logger.info("Creating database tables")
+            if reset:
+                db.drop_all()
             db.create_all()
         except Exception as error:
             Customer.logger.error('Oops, got error {}'.format(error.message))
@@ -163,7 +165,6 @@ class Customer(db.Model):
         Customer.logger.info('Removing all Customers')
         Customer.query.delete()
         db.session.commit()
-
 
 ######################################################################
 #  F I N D E R   M E T H O D S
