@@ -34,6 +34,7 @@
                 <div class="col-sm-3">
                   <input type="text" class="form-control" id="id_to_retrive" placeholder="Enter ID of Customers">
                 </div>
+                <div class="col-sm-1"></div>
                 <div class="col-sm-4">
                   <button type="submit" class="btn btn-primary" id="retrieve-btn">Retrieve</button>
                 </div>
@@ -56,6 +57,7 @@
                 <div class="col-sm-3">
                   <input type="text" class="form-control" id="id_to_delete" placeholder="Enter ID of Customers">
                 </div>
+                <div class="col-sm-1"></div>
                 <div class="col-sm-4">
                   <button type="submit" class="btn btn-danger" id="delete-btn">Delete</button>
                 </div>
@@ -127,6 +129,33 @@
           </div>
         </div>
 
+
+        <div class="well">
+          Upgrade & Degrade
+          <div class="form-horizontal">
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="id_to_grade">Customer ID:</label>
+              <div class="col-sm-3">
+                <input type="text" class="form-control" id="id_to_grade" placeholder="Enter ID of Customers">
+              </div>
+              <div class="col-sm-1"></div>
+              <div class="col-sm-2">
+                <button type="submit" class="btn btn-success" id="upgrade-btn">Upgrade</button>
+              </div>
+              <div class="col-sm-2">
+                <button type="submit" class="btn btn-danger" id="degrade-btn">Degrade</button>
+              </div>
+            </div>
+          </div> <!-- form div -->
+          <!-- Upgrade & Degrade Results -->
+          <div class="panel panel-default" id="grade_panel" style="border:solid;display:none">
+            <div class="panel-heading">
+              Upgrade & Degrade Results
+            </div>
+            <div class="panel-body" id="grade_results"></div>
+          </div>
+        </div>
+
         <div class="well">
           Search for a Customer:
           <div class="form-horizontal">
@@ -161,7 +190,7 @@
           <br><br>
           <p>&copy; NYU DevOps Company 2017</p>
         </footer>
-        </div><!--/span-->
+
      </div><!--/row-->
 
   </div><!-- container -->

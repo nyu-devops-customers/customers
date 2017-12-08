@@ -166,6 +166,56 @@ $(function () {
     });
 
     // ****************************************
+    // Upgrade a Customer
+    // ****************************************
+
+    $("#upgrade-btn").click(function () {
+
+        var customer_id = $("#id_to_grade").val();
+
+        var ajax = $.ajax({
+            type: "PUT",
+            url: "/customers/" + customer_id + "/upgrade-credit",
+            contentType:"application/json",
+            data: '',
+        })
+
+        ajax.done(function(res){
+            show_result("#grade_panel","#grade_results",[res])
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message("Server error!")
+        });
+    });
+
+    // ****************************************
+    // Degrade a Customer
+    // ****************************************
+
+    $("#degrade-btn").click(function () {
+
+        var customer_id = $("#id_to_grade").val();
+
+        var ajax = $.ajax({
+            type: "PUT",
+            url: "/customers/" + customer_id + "/downgrade-credit",
+            contentType:"application/json",
+            data: '',
+        })
+
+        ajax.done(function(res){
+            show_result("#grade_panel","#grade_results",[res])
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message("Server error!")
+        });
+    });
+
+    // ****************************************
     // Search for a Customer
     // ****************************************
 
