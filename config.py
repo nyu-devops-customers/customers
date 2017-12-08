@@ -4,7 +4,7 @@ import json
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-def get_sql_uri():
+def get_db_info():
     """
     Initialized MySQL database connection
     This method will work in the following conditions:
@@ -17,49 +17,40 @@ def get_sql_uri():
         logging.info("Using VCAP_SERVICES...")
         vcap_services = os.environ['VCAP_SERVICES']
         services = json.loads(vcap_services)
-        creds = services['elephantsql'][0]['credentials']
-        #uri = creds["uri"]
-        DB_USERNAME = creds["username"]
-        DB_PASSWORD = creds["password"]
-        DB_HOSTNAME = creds["hostname"]
-        DB_PORT = creds["port"]
-        DB_NAME = creds["name"]
+        
+        # cleardb
+        # creds = services['cleardb'][0]['credentials']
+        # username = creds["username"]
+        # password = creds["password"]
+        # hostname = creds["hostname"]
+        # port = creds["port"]
+        # name = creds["name"]
+
+        # PostSQL
+        full_uri = services['elephantsql'][0]['credentials']
+        uri = full_uri.split('/')[-2]
+        name = full_uri.split('/')[-1]
+        hostname = uri.split('@')[1].split(':')[0]
+        port = uri.split('@')[1].split(':')[1]
+        username = uri.split('@')[0].split(':')[0]
+        password = uri.split('@')[0].split(':')[1]
+
     else:
         logging.info("Using localhost database...")
 
-        DB_USERNAME = os.getenv('DB_USERNAME')
-        DB_PASSWORD = os.getenv('DB_PASSWORD', '')
-        DB_HOSTNAME = os.getenv('DB_HOST')
-        DB_PORT = os.getenv('DB_PORT')
-        DB_NAME = os.getenv('DB_DBNAME')
-
-    logging.info("Conecting to database on host %s port %s", DB_HOSTNAME, DB_PORT)
-    connect_string = 'mysql+pymysql://{}:{}@{}:{}/{}'
-    return connect_string.format(DB_USERNAME, DB_PASSWORD, DB_HOSTNAME, DB_PORT, DB_NAME)
-
-def get_db_info():
-    if 'VCAP_SERVICES' in os.environ:
-        vcap_services = os.environ['VCAP_SERVICES']
-        services = json.loads(vcap_services)
-        creds = services['elephantsql'][0]['credentials']
-        #uri = creds["uri"]
-        username = creds["username"]
-        password = creds["password"]
-        hostname = creds["hostname"]
-        port = creds["port"]
-        name = creds["name"]
-    else:
         username = os.getenv('DB_USERNAME')
         password = os.getenv('DB_PASSWORD', '')
         hostname = os.getenv('DB_HOST')
         port = os.getenv('DB_PORT')
         name = os.getenv('DB_DBNAME')
 
-    return username, password, hostname, port, name
+    logging.info("Conecting to database on host %s port %s", hostname, port)
+    connect_string = 'mysql+pymysql://{}:{}@{}:{}/{}'
+    uri = connect_string.format(username, password, hostname, port, name)
+    
+    return username, password, hostname, port, name, uri
 
-
-DB_USERNAME, DB_PASSWORD, DB_HOSTNAME, DB_PORT, DB_NAME = get_db_info()
-SQLALCHEMY_DATABASE_URI = get_sql_uri()
+DB_USERNAME, DB_PASSWORD, DB_HOSTNAME, DB_PORT, DB_NAME, SQLALCHEMY_TRACK_MODIFICATIONS = get_db_info()
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SECRET_KEY = 'secret-for-dev-only'
