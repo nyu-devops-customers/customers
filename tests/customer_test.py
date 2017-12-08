@@ -215,19 +215,11 @@ class TestCustomers(unittest.TestCase):
         customer = Customer.find(2)
         self.assertIs(customer, None)
 
-    def test_find_by_lastname(self):
-        """ Find Customers by Lastname """
-        Customer(firstname = "fido", lastname = "dog").save()
-        Customer(firstname = "kitty", lastname = "cat").save()
-        customers = Customer.find_by_lastname("cat")
-        self.assertEqual(customers[0].lastname, "cat")
-        self.assertEqual(customers[0].firstname, "kitty")
-
-    def test_find_by_firstname(self):
+    def test_find_by_name(self):
         """ Find a Customer by Firstname """
         Customer(firstname = "fido", lastname = "dog").save()
         Customer(firstname = "kitty", lastname = "cat").save()
-        customers = Customer.find_by_firstname("kitty")
+        customers = Customer.find_by_kargs({"firstname":"kitty"})
         self.assertEqual(customers[0].lastname, "cat")
         self.assertEqual(customers[0].firstname, "kitty")
 

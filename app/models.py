@@ -186,7 +186,13 @@ class Customer(db.Model):
     def find_by_kargs(args):
         """ Query that finds Customers by their lastname """
         Customer.logger.info('Processing name query for %s ...', str(args))
+        if len(args) == 0:
+            return Customer.all()
         q = Customer.query
-        for attr, value in args.items():
-            q = q.filter(getattr(Customer, attr) == value)
-        return q.all()
+        try:
+            for attr, value in args.items():
+                q = q.filter(getattr(Customer, attr) == value)
+            return q.all()
+        except AttributeError as error:
+            raise DataValidationError('Invalid Query String:' + str(args))
+
