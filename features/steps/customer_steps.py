@@ -64,18 +64,6 @@ def step_impl(context, btn_id):
     btn.click()
     time.sleep(2)
 
-@then(u'I should see "{name}" in the results')
-def step_impl(context, name):
-    element = context.driver.find_element_by_id('search_results')
-    print(element.text)
-    assert name in element.text
-
-@then(u'I should not see "{name}" in the results')
-def step_impl(context, name):
-    element = context.driver.find_element_by_id('search_results')
-    print(element.text)
-    assert name not in element.text
-
 @then(u'I should see the message "{message}"')
 def step_impl(context, message):
     element = context.driver.find_element_by_id('flash_message')
