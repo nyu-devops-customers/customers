@@ -77,13 +77,31 @@ def step_impl(context, message):
 # We can then lowercase the name and prefix with pet_ to get the id
 ##################################################################
 
-@then(u'I should see "{text_string}" in the "{table_id}" table')
+@then(u'I should see "{text_string}" in all rows of the "{table_id}" table')
 def step_impl(context, text_string, table_id):
     table = context.driver.find_element_by_id(table_id)
-    rows = table.find_elements_by_xpath(".//tr")
-    for row in rows:
+    parsed_table = map(lambda x:x.split(" "), table.text.split("\n"))
+    for row in parsed_table[1:]:
         text = row.text
-        print(text)
-        if text.find(text_string) > 0:
+        assert text_string in row
+
+@then(u'I should see "{text_string}" in least one row of the "{table_id}" table')
+def step_impl(context, text_string, table_id):
+    table = context.driver.find_element_by_id(table_id)
+    parsed_table = map(lambda x:x.split(" "), table.text.split("\n"))
+    for row in parsed_table:
+        text = row.text
+        if text_string in row:
             return
     assert 0
+
+@then(u'I should see "{text_string}" in position {row},{col} of the "{table_id}" table')
+def step_impl(context, text_string, row, col, table_id):
+    row = int(row)
+    col = int(col)
+    table = context.driver.find_element_by_id(table_id)
+    parsed_table = map(lambda x:x.split(" "), table.text.split("\n"))
+    # import ipdb
+    # ipdb.set_trace()
+    assert parsed_table[row][col-1] == text_string
+
