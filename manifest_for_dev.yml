@@ -5,7 +5,7 @@ applications:
   memory: 128M
   instances: 1
   #random-route: true
-  host: nyu-customer-service-f17-dev
+  #host: nyu-customer-service-f17-dev
   domain: mybluemix.net
   path: .
   disk_quota: 512M
