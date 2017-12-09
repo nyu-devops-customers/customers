@@ -40,7 +40,7 @@ import logging
 from . import db
 from . import app
 from sqlalchemy.exc import DisconnectionError
-
+import pymysql
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
     pass
@@ -62,9 +62,6 @@ class Customer(db.Model):
     lastname = db.Column(db.String(63))
     valid = db.Column(db.Boolean(), default=True)
     credit_level = db.Column(db.Integer, default=0)
-
-    def __repr__(self):
-        return '<Customer %r>' % (self.lastname)
 
     def upgrade_credit_level(self):
         """ Upgrade the credit level of the customer """
@@ -125,6 +122,7 @@ class Customer(db.Model):
     def init_db(reset = False):
         """ Initializes the database session """
         Customer.logger.info('Initializing database')
+        # import pdb; pdb.set_trace()
         uri = app.config['SQLALCHEMY_DATABASE_URI']
         Customer.logger.info('Database URI {}'.format(uri))
         try:
@@ -140,6 +138,7 @@ class Customer(db.Model):
             host = app.config['DB_HOSTNAME']
             user = app.config['DB_USERNAME']
             password = app.config['DB_PASSWORD']
+            # raise DatabaseConnectionError('Could not connect to the clients MySQL Service')
             # Connect and create the database
             try:
                 conn = pymysql.connect(host=host, user=user, password=password)
@@ -175,12 +174,6 @@ class Customer(db.Model):
         return Customer.query.get(customer_id)
 
     @staticmethod
-    def find_or_404(customer_id):
-        """ Find a Customer by his id """
-        Customer.logger.info('Processing lookup or 404 for id %s ...', customer_id)
-        return Customer.query.get_or_404(customer_id)
-
-    @staticmethod
     def find_by_kargs(args):
         """ Query that finds Customers by their lastname """
         Customer.logger.info('Processing name query for %s ...', str(args))
@@ -193,4 +186,3 @@ class Customer(db.Model):
             return q.all()
         except AttributeError as error:
             raise DataValidationError('Invalid Query String:' + str(args))
-

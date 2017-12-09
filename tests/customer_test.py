@@ -10,7 +10,9 @@ import unittest
 from app import app, db
 from app.models import Customer
 from app.models import DataValidationError
-
+from app.models import DatabaseConnectionError
+from sqlalchemy.exc import DisconnectionError
+from mock import MagicMock, patch
 # DATABASE_URI = 'mysql+pymysql://root:passw0rd@localhost:3306/test'
 DATABASE_URI = os.getenv('DATABASE_URI', None)
 
@@ -215,13 +217,19 @@ class TestCustomers(unittest.TestCase):
         self.assertIs(customer, None)
 
     def test_find_by_name(self):
-        """ Find a Customer by Firstname """
+        """ Find a Customer by Lastname """
         Customer(firstname = "fido", lastname = "dog").save()
         Customer(firstname = "kitty", lastname = "cat").save()
-        customers = Customer.find_by_kargs({"firstname":"kitty"})
-        self.assertEqual(customers[0].lastname, "cat")
-        self.assertEqual(customers[0].firstname, "kitty")
+        Customer(firstname = "kk", lastname = "dog").save()
+        customers = Customer.find_by_kargs({"lastname":"dog"})
+        self.assertEqual(customers[0].lastname, "dog")
 
+    @patch('app.models.db.create_all')
+    def test_db_error(self,db_error_mock):
+        """ Test database error """
+        db_error_mock.side_effect = DisconnectionError()
+        # import pdb; pdb.set_trace()
+        self.assertRaises(DatabaseConnectionError, Customer.init_db)
 
 ######################################################################
 #   M A I N
