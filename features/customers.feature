@@ -25,15 +25,19 @@ Scenario: Create a Customer
 Scenario: List All Customers
     When I visit the "home page"
     And I press the "search-btn" button
-    Then I should see "Da Huo" in the "search_results" table
-    And I should see "Huri Ma" in the "search_results" table
-    And I should see "Yuqian Zhang" in the "search_results" table
+    Then I should see "Da" in position 1,2 of the "search_results" table
+    Then I should see "Huo" in position 1,3 of the "search_results" table
+    And I should see "Huri" in position 2,2 of the "search_results" table
+    And I should see "Ma" in position 2,3 of the "search_results" table
+    And I should see "Yuqian" in position 3,2 of the "search_results" table
+    And I should see "Zhang" in position 3,3 of the "search_results" table
 
 Scenario: Update a Customer
     When I visit the "home page"
     And I set the "id_to_retrive" to "1"
     And I press the "retrieve-btn" button
-    Then I should see "Da Huo" in the "retrieve_results" table
+    Then I should see "Da" in position 1,2 of the "retrieve_results" table
+    And I should see "Huo" in position 1,3 of the "retrieve_results" table
     When I set the "first_name_to_update" to "Danial"
     And I set the "last_name_to_update" to "Huo"
     And I set the "id_to_update" to "1"
@@ -41,4 +45,5 @@ Scenario: Update a Customer
     Then I should see the message "Success"
     When I set the "id_to_retrive" to "1"
     And I press the "retrieve-btn" button
-    Then I should see "Danial Huo" in the "retrieve_results" table
+    Then I should see "Danial" in position 1,2 of the "retrieve_results" table
+    And I should see "Huo" in position 1,3 of the "retrieve_results" table
