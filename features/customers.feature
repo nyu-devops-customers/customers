@@ -87,10 +87,13 @@ Scenario: Delete an existing Customer and Search all Customers
     Then I should see the message "Success" in status bar
     And I should see "Da" in position 1,2 of the "search_results" table
     And I should see "Huo" in position 1,3 of the "search_results" table
-    And I should not see "Huri" in position 2,2 of the "search_results" table
-    And I should not see "Ma" in position 2,3 of the "search_results" table
-    And I should not see "Yuqian" in position 3,2 of the "search_results" table
-    And I should not see "Zhang" in position 3,3 of the "search_results" table
+    And I should see "Huri" in position 2,2 of the "search_results" table
+    And I should see "Ma" in position 2,3 of the "search_results" table
+    When I visit the "home page"
+    And I set the "id_to_retrive" to "3"
+    When I press the "retrieve-btn" button
+    Then I should see the message "Customer with id '3' was not found. You have requested this URI [/customers/3] but did you mean /customers/ or /customers/reset ?" in status bar
+
 
 Scenario: Update an existing Customer
     When I visit the "home page"
