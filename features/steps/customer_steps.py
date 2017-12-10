@@ -8,8 +8,14 @@ from os import getenv
 import json, time
 import requests
 from behave import *
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions
+
 from app import server
 
+WAIT_SECONDS = 30
 BASE_URL = getenv('BASE_URL', 'http://localhost:5000/')
 
 @given(u'the following customers')
@@ -64,7 +70,7 @@ def step_impl(context, btn_id):
     btn.click()
     time.sleep(2)
 
-@then(u'I should see the message "{message}"')
+@then(u'I should see the message "{message}" in status bar')
 def step_impl(context, message):
     element = context.driver.find_element_by_id('flash_message')
     print(element.text)
@@ -105,3 +111,12 @@ def step_impl(context, text_string, row, col, table_id):
     # ipdb.set_trace()
     assert parsed_table[row][col-1] == text_string
 
+@then(u'I should not see "{text_string}" in position {row},{col} of the "{table_id}" table')
+def step_impl(context, text_string, row, col, table_id):
+    row = int(row)
+    col = int(col)
+    table = context.driver.find_element_by_id(table_id)
+    parsed_table = map(lambda x:x.split(" "), table.text.split("\n"))
+    # import ipdb
+    # ipdb.set_trace()
+    assert parsed_table[row][col-1] != text_string

@@ -130,7 +130,6 @@ $(function () {
 
         ajax.done(function(res){
             //alert(res.toSource())
-            show_result("#retrieve_panel","#retrieve_results",[res])
             flash_message("Success")
         });
 
