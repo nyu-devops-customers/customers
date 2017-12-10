@@ -56,10 +56,11 @@ Scenario: Create and Search all Customers
     And I should see "Lin" in position 4,3 of the "search_results" table
 
 Scenario: Retrieve an existing Customer
+    When I visit the "home page"
     And I set the "id_to_retrive" to "1"
     And I press the "retrieve-btn" button
-    Then I should see "Da" in position 1,2 of the "retrieve_reuslts" table
-    And I should see "Huo" in position 1,3 of the "retrieve_reuslts" table
+    Then I should see "Da" in position 1,2 of the "retrieve_results" table
+    And I should see "Huo" in position 1,3 of the "retrieve_results" table
 
 Scenario: Retrieve a not existing Customer
     When I visit the "home page"
@@ -67,22 +68,12 @@ Scenario: Retrieve a not existing Customer
     And I press the "retrieve-btn" button
     Then I should see the message "Customer with id '5' was not found. You have requested this URI [/customers/5] but did you mean /customers/ or /customers/reset ?" in status bar
 
-Scenario: Delete an existing Customer
-    When I visit the "home page"
-    And I set the "id_to_delete" to "3"
-    And I press the "delete-btn" button
-    Then I should see the message "Success" in status bar
-
-Scenario: Delete a not existing Customer
-    When I visit the "home page"
-    And I set the "id_to_delete" to "7"
-    And I press the "delete-btn" button
-    Then I should see the message "Success" in status bar
 
 Scenario: Delete an existing Customer and Retrieve that Customer
     When I visit the "home page"
     And I set the "id_to_delete" to "2"
     And I press the "delete-btn" button
+    When I visit the "home page"
     And I set the "id_to_retrive" to "2"
     When I press the "retrieve-btn" button
     Then I should see the message "Customer with id '2' was not found. You have requested this URI [/customers/2] but did you mean /customers/ or /customers/reset ?" in status bar
@@ -90,17 +81,16 @@ Scenario: Delete an existing Customer and Retrieve that Customer
 
 Scenario: Delete an existing Customer and Search all Customers
     When I visit the "home page"
-    And I set the "id_to_delete" to "2"
+    And I set the "id_to_delete" to "3"
     And I press the "delete-btn" button
-    When I visit the "home page"
     And I press the "search-btn" button
     Then I should see the message "Success" in status bar
     And I should see "Da" in position 1,2 of the "search_results" table
     And I should see "Huo" in position 1,3 of the "search_results" table
     And I should not see "Huri" in position 2,2 of the "search_results" table
     And I should not see "Ma" in position 2,3 of the "search_results" table
-    And I should see "Yuqian" in position 3,2 of the "search_results" table
-    And I should see "Zhang" in position 3,3 of the "search_results" table
+    And I should not see "Yuqian" in position 3,2 of the "search_results" table
+    And I should not see "Zhang" in position 3,3 of the "search_results" table
 
 Scenario: Update an existing Customer
     When I visit the "home page"
@@ -118,15 +108,16 @@ Scenario: Update a not existing Customer
 Scenario: Update an existing Customer and Retrieve that Customer
     When I visit the "home page"
     When I set the "id_to_update" to "1"
-    And I set the "first_name_to_update" to "Danial"
+    And I set the "first_name_to_update" to "Dada"
     And I set the "last_name_to_update" to "Huo"
     And I press the "update-btn" button
     Then I should see the message "Success" in status bar
-    And I should see "Danial" in position 1,2 of the "update_results" table
+    And I should see "Dada" in position 1,2 of the "update_results" table
     And I should see "Huo" in position 1,3 of the "update_results" table
+    When I visit the "home page"
     When I set the "id_to_retrive" to "1"
     And I press the "retrieve-btn" button
-    Then I should see "Danial" in position 1,2 of the "retrieve_results" table
+    Then I should see "Dada" in position 1,2 of the "retrieve_results" table
     And I should see "Huo" in position 1,3 of the "retrieve_results" table
 
 Scenario: Update an existing Customer and Search all Customers

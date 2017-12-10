@@ -68,7 +68,7 @@ def step_impl(context, element_id, text_string):
 def step_impl(context, btn_id):
     btn = context.driver.find_element_by_id(btn_id)
     btn.click()
-    time.sleep(2)
+    # time.sleep(2)
 
 @then(u'I should see the message "{message}" in status bar')
 def step_impl(context, message):
