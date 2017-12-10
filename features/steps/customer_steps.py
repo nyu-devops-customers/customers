@@ -70,6 +70,7 @@ def step_impl(context, btn_id):
     btn.click()
     # time.sleep(2)
 
+
 @then(u'I should see the message "{message}" in status bar')
 def step_impl(context, message):
     element = context.driver.find_element_by_id('flash_message')
@@ -119,4 +120,5 @@ def step_impl(context, text_string, row, col, table_id):
     parsed_table = map(lambda x:x.split(" "), table.text.split("\n"))
     # import ipdb
     # ipdb.set_trace()
-    assert parsed_table[row][col-1] != text_string
+    assert parsed_table[row][col-1].find(text_string) == -1
+#   assert parsed_table[row][col-1] != text_string
