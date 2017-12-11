@@ -68,7 +68,7 @@ def step_impl(context, element_id, text_string):
 def step_impl(context, btn_id):
     btn = context.driver.find_element_by_id(btn_id)
     btn.click()
-    # time.sleep(2)
+    time.sleep(2)
 
 
 @then(u'I should see the message "{message}" in status bar')
@@ -89,7 +89,6 @@ def step_impl(context, text_string, table_id):
     table = context.driver.find_element_by_id(table_id)
     parsed_table = map(lambda x:x.split(" "), table.text.split("\n"))
     for row in parsed_table[1:]:
-        text = row.text
         assert text_string in row
 
 @then(u'I should see "{text_string}" in least one row of the "{table_id}" table')
@@ -97,7 +96,6 @@ def step_impl(context, text_string, table_id):
     table = context.driver.find_element_by_id(table_id)
     parsed_table = map(lambda x:x.split(" "), table.text.split("\n"))
     for row in parsed_table:
-        text = row.text
         if text_string in row:
             return
     assert 0
@@ -121,4 +119,3 @@ def step_impl(context, text_string, row, col, table_id):
     # import ipdb
     # ipdb.set_trace()
     assert parsed_table[row][col-1].find(text_string) == -1
-#   assert parsed_table[row][col-1] != text_string
