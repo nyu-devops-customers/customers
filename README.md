@@ -108,11 +108,11 @@ Finally you can see the microservice Swagger docs at: http://localhost:5000/
 
 **app/server.py** - the main Service using Python Flask-RESTPlus for Swagger
 
-**models.py** -- hold model definitions of resource
+**app/models.py** -- hold model definitions of resource
 
 **tests/test_server.py** -- test cases using unittest for the microservice
 
-**tesets/Customer_test.py** -- test cases using unittest for customer model
+**tests/Customer_test.py** -- test cases using unittest for customer model
 
 
 
