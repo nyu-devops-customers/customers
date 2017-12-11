@@ -145,11 +145,9 @@ class Customer(db.Model):
                 conn.cursor().execute('create database IF NOT EXISTS {}'.format(dbname))
                 Customer.logger.info("Creating database tables")
                 db.create_all()
-            except DisconnectionError:
-                Customer.logger.error("Client Connection Error!")
+            except Exception as error:
+                Customer.logger.error('reconnect database fail! got error {}'.format(error.message))
                 raise DatabaseConnectionError('Could not connect to the clients MySQL Service')
-
-
 
     @staticmethod
     def all():
