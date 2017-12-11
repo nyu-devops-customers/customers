@@ -8,7 +8,7 @@ Background:
         | id | firstname  | lastname | valid   | credit_level  |
         |  1 | Da         | Huo      | True    | 10            |
         |  2 | Huri       | Ma       | True    | 10            |
-        |  3 | Yuqian     | Zhang    | True    | 1            |
+        |  3 | Yuqian     | Zhang    | True    | 1             |
 
 Scenario: The server is running
     When I visit the "home page"
@@ -32,16 +32,16 @@ Scenario: List All Customers
 Scenario: Find by first name
     When I visit the "home page"
     And I set the "first_name_to_search" to "Da"
-    And I press the "search-btn" button   
-    Then I should see the message "Success" in status bar 
+    And I press the "search-btn" button
+    Then I should see the message "Success" in status bar
     And I should see "Da" in all rows of the "search_results" table
 
 
 Scenario: Find by last name
     When I visit the "home page"
     And I set the "last_name_to_search" to "Huo"
-    And I press the "search-btn" button   
-    Then I should see the message "Success" in status bar 
+    And I press the "search-btn" button
+    Then I should see the message "Success" in status bar
     And I should see "Huo" in all rows of the "search_results" table
 
 
@@ -49,8 +49,8 @@ Scenario: Find by Both(first name and last name)
     When I visit the "home page"
     And I set the "first_name_to_search" to "Da"
     And I set the "last_name_to_search" to "Huo"
-    And I press the "search-btn" button   
-    Then I should see the message "Success" in status bar 
+    And I press the "search-btn" button
+    Then I should see the message "Success" in status bar
     And I should see "Da" in all rows of the "search_results" table
     And I should see "Huo" in all rows of the "search_results" table
 
@@ -106,7 +106,7 @@ Scenario: Retrieve a not existing Customer
     When I visit the "home page"
     And I set the "id_to_retrive" to "5"
     And I press the "retrieve-btn" button
-    Then I should see the message "Customer with id '5' was not found." in status bar 
+    Then I should see the message "Customer with id '5' was not found." in status bar
 
 """
 DELETE
@@ -118,7 +118,7 @@ Scenario: Delete an existing Customer and Retrieve that Customer
     When I visit the "home page"
     And I set the "id_to_retrive" to "2"
     When I press the "retrieve-btn" button
-    Then I should see the message "Customer with id '2' was not found." in status bar 
+    Then I should see the message "Customer with id '2' was not found." in status bar
 
 
 Scenario: Delete an existing Customer and Search all Customers
@@ -139,7 +139,7 @@ Scenario: Delete an existing Customer and Search all Customers
 """
 UPDATE
 """
-Scenario: Update an existing Customer
+Scenario: Update an existing Customer and Search all Customers
     When I visit the "home page"
     When I set the "id_to_update" to "1"
     And I set the "first_name_to_update" to "Danial"
@@ -179,10 +179,10 @@ Scenario: Update an existing Customer and Retrieve that Customer
     And I press the "retrieve-btn" button
     Then I should see "Dada" in position 1,2 of the "retrieve_results" table
     And I should see "Huo" in position 1,3 of the "retrieve_results" table
+
 """
 ACTION: UPGRADE/DOWNGTADE
 """
-
 Scenario: Updgrade Credit Level of a nonexistent Customer
     When I visit the "home page"
     When I set the "id_to_grade" to "5"
