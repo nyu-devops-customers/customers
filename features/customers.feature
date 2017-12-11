@@ -34,8 +34,7 @@ Scenario: Find by first name
     And I set the "first_name_to_search" to "Da"
     And I press the "search-btn" button   
     Then I should see the message "Success" in status bar 
-    And I should see "Da" in position 1,2 of the "search_results" table
-    And I should see "Huo" in position 1,3 of the "search_results" table
+    And I should see "Da" in all rows of the "search_results" table
 
 
 Scenario: Find by last name
@@ -43,8 +42,7 @@ Scenario: Find by last name
     And I set the "last_name_to_search" to "Huo"
     And I press the "search-btn" button   
     Then I should see the message "Success" in status bar 
-    And I should see "Da" in position 1,2 of the "search_results" table
-    And I should see "Huo" in position 1,3 of the "search_results" table
+    And I should see "Huo" in all rows of the "search_results" table
 
 
 Scenario: Find by Both(first name and last name)
@@ -53,8 +51,8 @@ Scenario: Find by Both(first name and last name)
     And I set the "last_name_to_search" to "Huo"
     And I press the "search-btn" button   
     Then I should see the message "Success" in status bar 
-    And I should see "Da" in position 1,2 of the "search_results" table
-    And I should see "Huo" in position 1,3 of the "search_results" table
+    And I should see "Da" in all rows of the "search_results" table
+    And I should see "Huo" in all rows of the "search_results" table
 
 Scenario: Search a not existing Customer
     When I visit the "home page"
