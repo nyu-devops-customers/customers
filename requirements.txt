@@ -22,3 +22,4 @@ redis==2.10.6
 behave==1.2.5
 selenium==3.3.1
 requests==2.13.0
+compare==0.2b0
