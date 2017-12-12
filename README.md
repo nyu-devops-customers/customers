@@ -19,37 +19,37 @@ This will place you into an Ubuntu VM all set to run the code.
 
 ### 1.Return all of the customers with no input 
   
-    get /customers/<customer_id>
+    GET /customers
 
 
 ### 2.Retrieve a single customer with input "customer_id"
    
-    get /customers
+    GET /customers/<customer_id>
 
 
 ### 3.Add a new Customer with no input
 
-    post /customers
+    POST /customers
 
 
 ### 4.Update an exsiting customers with input "customer_id"
 
-    put /customers/<customer_id>
+    PUT /customers/<customer_id>
 
 
-### 5.Increase the credit of a customer with input "customer_id"
+### 5.Upgrade the Credit Level of a customer with input "customer_id"
 
-    put /customers/<customer_id>/upgrade-credit
+    PUT /customers/<customer_id>/upgrade-credit
 
 
-### 6.Decrese the credit of a customer with input "customer_id"
+### 6.Downgrade the Credit Level of a customer with input "customer_id"
     
-    put /customers/<customer_id>/degrade-credit
+    PUT /customers/<customer_id>/degrade-credit
 
 
 ### 7.Delete A customer with input "customer_id"
     
-    delete /accounts/<customer_id>
+    DELETE /customers/<customer_id>
 
 
 ## Running the code
@@ -101,7 +101,7 @@ You can then run the server with:
     
     $ python run.py
 
-Finally you can see the microservice Swagger docs at: http://localhost:5000/
+Finally you can see the microservice Swagger docs at: http://localhost:5000/doc
 
 	 
 ## What's featured in the project?
