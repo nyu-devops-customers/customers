@@ -74,11 +74,7 @@ If the VM is no longer needed you can remove it with:
 You can run the tests using `nosetests`
 
     $ nosetests
-
-Run Code Coverage to see how well your test cases exercise your code:
-
-    $ coverage run test_server.py
-    $ coverage report -m --include=server.py
+    $ coverage report -m
 
 You can even run `nosetests` with `coverage`
 
@@ -87,7 +83,7 @@ You can even run `nosetests` with `coverage`
 ## Behavior Tests
 You can run the code to test it out in your browser with the following command:
 
-    $ python run.py
+    $ python run.py &
     
 You should be able to see it at: http://localhost:5000/
     
