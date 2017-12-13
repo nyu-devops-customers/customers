@@ -125,21 +125,21 @@ def step_impl(context, text_string, table_id):
 
 @then(u'I should see "{text_string}" in position {row},{col} of the "{table_id}" table')
 def step_impl(context, text_string, row, col, table_id):
-    # row = int(row)
-    # col = int(col)
-    # table = context.driver.find_element_by_id(table_id)
-    # parsed_table = map(lambda x:x.split(" "), table.text.split("\n"))
-    # # import ipdb
-    # # ipdb.set_trace()
-    # # assert parsed_table[row][col-1] == text_string
-    # expect(parsed_table[row][col-1]).to_equal(text_string)
-    found = WebDriverWait(context.driver, WAIT_SECONDS).until(
-        expected_conditions.text_to_be_present_in_element(
-            (By.ID, table_id),
-            text_string
-        )
-    )
-    expect(found).to_be(True)
+    row = int(row)
+    col = int(col)
+    table = context.driver.find_element_by_id(table_id)
+    parsed_table = map(lambda x:x.split(" "), table.text.split("\n"))
+    # import ipdb
+    # ipdb.set_trace()
+    # assert parsed_table[row][col-1] == text_string
+    expect(parsed_table[row][col-1]).to_equal(text_string)
+#     found = WebDriverWait(context.driver, WAIT_SECONDS).until(
+#         expected_conditions.text_to_be_present_in_element(
+#             (By.ID, table_id),
+#             text_string
+#         )
+#     )
+#     expect(found).to_be(True)
 
 @then(u'I should not see "{text_string}" in position {row},{col} of the "{table_id}" table')
 def step_impl(context, text_string, row, col, table_id):
